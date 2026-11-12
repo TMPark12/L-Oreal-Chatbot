@@ -44,7 +44,7 @@
               <div class="message-avatar" aria-hidden="true">L</div>
               <div class="message-content">
                 <p class="message-name">L'ORÉAL BEAUTY ASSISTANT</p>
-                <div class="message"><p>Hi there! I'm so glad you're here.</p><p>Before we get started, what would you like me to call you?</p></div>
+                <div class="message"><p>Hi there! 👋 Welcome to your personal beauty assistant. I'm here to help you find products, answer questions, and make your beauty routine amazing.</p><p>To get started, what should I call you?</p></div>
               </div>
             </li>
           </ol>
@@ -87,9 +87,13 @@
     </address>
   </footer>
   <dialog class="end-chat-dialog" id="end-chat-dialog" aria-labelledby="end-chat-message">
-    <p class="eyebrow">UNTIL NEXT TIME</p>
-    <p id="end-chat-message">Thank  you so much for trusting us with your questions. We look forward for further interatcions with you across our company lines. Always come back to, "How may I assist you today?"</p>
-    <form method="dialog"><button class="ask-button" type="submit">CLOSE CHAT</button></form>
+    <p class="eyebrow">THANK YOU!</p>
+    <p id="end-chat-message">Thank you so much for your wonderful questions today! I absolutely loved helping you explore L'Oréal beauty products and tips. Your curiosity and engagement made this chat truly special. 💕</p>
+    <p class="end-chat-note">Remember, beauty is personal and unique to you. Feel free to come back anytime you want more recommendations, tips, or just to chat about your beauty routine. We can't wait to see you again! ✨</p>
+    <form class="end-chat-actions" method="dialog">
+      <button class="ask-button" type="submit" onclick="clearChatHistory()">START NEW CHAT</button>
+      <button class="end-chat-close-button" type="button" onclick="this.closest('dialog').close()">CLOSE</button>
+    </form>
   </dialog>
   <script src="chat.js" defer></script>
 </body>

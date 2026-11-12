@@ -37,10 +37,20 @@ function addMessage(text, role, isError = false, sources = []) {
 
   const message = document.createElement("div");
   message.className = `message${role === "user" ? " user-message" : ""}${isError ? " error-message" : ""}`;
-  const paragraph = document.createElement("p");
-  paragraph.textContent = text;
-  message.append(paragraph);
+  
+  // Parse formatted text (bold, bullets, sections)
+  const messageContainer = parseFormattedText(text);
+  message.append(messageContainer);
+  
   if (sources.length > 0) {
+    const sourceSection = document.createElement("div");
+    sourceSection.className = "source-section";
+    
+    const sourceLabel = document.createElement("p");
+    sourceLabel.className = "source-label";
+    sourceLabel.textContent = "📚 Sources";
+    sourceSection.append(sourceLabel);
+    
     const sourceList = document.createElement("ul");
     sourceList.className = "source-list";
     sources.forEach((source) => {
@@ -53,12 +63,68 @@ function addMessage(text, role, isError = false, sources = []) {
       item.append(link);
       sourceList.append(item);
     });
-    message.append(sourceList);
+    sourceSection.append(sourceList);
+    message.append(sourceSection);
   }
   content.append(name, message);
   listItem.append(avatar, content);
   conversation.append(listItem);
   conversation.scrollTop = conversation.scrollHeight;
+}
+
+function parseFormattedText(text) {
+  const container = document.createElement("div");
+  container.className = "formatted-text";
+  
+  // Split by double newlines for sections
+  const sections = text.split(/\n\n+/);
+  
+  sections.forEach((section, sectionIndex) => {
+    const lines = section.split("\n");
+    let currentElement = null;
+    
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      
+      if (!trimmed) return;
+      
+      // Check for bullet points
+      if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
+        if (!currentElement || !currentElement.classList.contains("bullet-list")) {
+          currentElement = document.createElement("ul");
+          currentElement.className = "bullet-list";
+          container.append(currentElement);
+        }
+        const li = document.createElement("li");
+        li.innerHTML = trimmed.replace(/^[•\-]\s*/, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        currentElement.append(li);
+      }
+      // Check for section headers (all caps or ending with colon)
+      else if (trimmed.match(/^[A-Z][A-Z\s]+:?$/) || trimmed.endsWith(":")) {
+        const header = document.createElement("p");
+        header.className = "section-header";
+        header.textContent = trimmed.replace(/:$/, "");
+        container.append(header);
+        currentElement = null;
+      }
+      // Regular paragraph with bold formatting
+      else {
+        const p = document.createElement("p");
+        p.innerHTML = trimmed.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        container.append(p);
+        currentElement = null;
+      }
+    });
+    
+    // Add spacing between sections
+    if (sectionIndex < sections.length - 1) {
+      const spacer = document.createElement("div");
+      spacer.style.height = "8px";
+      container.append(spacer);
+    }
+  });
+  
+  return container;
 }
 
 function setBusy(isBusy) {
@@ -68,8 +134,8 @@ function setBusy(isBusy) {
   });
   questionInput.disabled = isBusy || chatEnded;
   endChatButton.disabled = isBusy || chatEnded;
-  askButton.textContent = isBusy ? "THINKING…" : "ASK AWAY";
-  statusMessage.textContent = isBusy ? "Just a moment, we're finding an answer for you." : "";
+  askButton.textContent = isBusy ? "✨ FINDING YOUR ANSWER…" : "ASK AWAY";
+  statusMessage.textContent = isBusy ? "Let me search for the perfect answer for you..." : "";
 }
 
 async function sendQuestion(question, category = null) {
@@ -136,8 +202,8 @@ function startChat(name) {
   if (preferredName) addMessage(preferredName, "user");
   addMessage(
     preferredName
-      ? `It's lovely to meet you, ${preferredName}! Choose a topic below, or ask me anything about L'Oréal beauty.`
-      : "I'm happy you're here! Choose a topic below, or ask me anything about L'Oréal beauty.",
+      ? `Welcome, ${preferredName}! 🌟 I'm so excited to help you explore your beauty routine. Pick a topic below to get started, or ask me anything about L'Oréal beauty products and tips!`
+      : "Welcome! 🌟 I'm here to help you discover the perfect L'Oréal products for you. Choose a topic below, or ask me anything about our beauty lines!",
     "assistant",
   );
   questionInput.focus();
@@ -173,6 +239,19 @@ topicButtons.forEach((button) => {
     sendQuestion(button.dataset.prompt, button.dataset.category);
   });
 });
+
+function clearChatHistory() {
+  history.splice(0, history.length);
+  conversation.querySelectorAll("li").forEach((item) => item.remove());
+  preferredName = "";
+  nameResolved = false;
+  chatEnded = false;
+  questionInput.value = "";
+  statusMessage.textContent = "";
+  nameForm.hidden = false;
+  topics.hidden = true;
+  questionSection.hidden = true;
+}
 
 endChatButton.addEventListener("click", () => {
   chatEnded = true;

@@ -47,7 +47,16 @@ h2 { margin: 0; font-size: 25px; }
 .message p + p { margin-top: 10px; }
 .message.user-message { background: #f5e4e2; }
 .message.error-message { background: #fff1ef; color: #8c3734; }
-.source-list { display: flex; flex-direction: column; gap: 5px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 11px; }
+.formatted-text p { margin: 0; }
+.formatted-text p + p { margin-top: 10px; }
+.section-header { margin: 16px 0 8px 0; font-weight: 600; color: #5a5a5a; font-size: 13px; }
+.bullet-list { margin: 8px 0; padding-left: 20px; list-style: none; }
+.bullet-list li { margin: 6px 0; position: relative; padding-left: 8px; }
+.bullet-list li:before { content: "•"; position: absolute; left: 0; color: #a45b59; }
+.bullet-list li strong { color: #7a5959; font-weight: 600; }
+.source-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.08); }
+.source-label { margin: 0 0 8px; font-size: 11px; font-weight: 600; color: #716e69; text-transform: uppercase; }
+.source-list { display: flex; flex-direction: column; gap: 5px; margin: 0; padding: 0; list-style: none; font-size: 11px; }
 .source-list a { color: #814744; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .topics { padding: 12px 30px 28px 76px; }
 .topics > p { margin: 0 0 14px; color: var(--muted); font-size: 9px; }
@@ -80,8 +89,11 @@ footer a span { margin-left: 5px; }
 footer strong { margin-right: 5px; color: var(--ink); }
 .end-chat-dialog { width: min(440px, calc(100% - 32px)); padding: 30px; border: 1px solid var(--line); background: #fff; color: var(--ink); box-shadow: 0 18px 60px #17171730; }
 .end-chat-dialog::backdrop { background: #17171780; }
-.end-chat-dialog > p:nth-of-type(2) { margin: 0 0 24px; font-family: "Playfair Display", Georgia, serif; font-size: 21px; line-height: 1.55; }
-.end-chat-dialog form { display: flex; justify-content: flex-end; }
+.end-chat-dialog > p:nth-of-type(2) { margin: 0 0 12px; font-family: "Playfair Display", Georgia, serif; font-size: 21px; line-height: 1.55; }
+.end-chat-note { margin: 0 0 28px; font-size: 14px; line-height: 1.6; color: #625e5a; }
+.end-chat-actions { display: flex; gap: 12px; }
+.end-chat-close-button { flex: 1; min-height: 48px; padding: 13px 20px; border: 1px solid var(--ink); background: transparent; color: var(--ink); font: inherit; font-size: 10px; font-weight: 700; letter-spacing: .08em; cursor: pointer; }
+.end-chat-close-button:hover { background: #f5e4e2; }
 @media (max-width: 820px) {
   .site-header { min-height: calc(74px + env(safe-area-inset-top)); }
   .wordmark { font-size: 26px; }
