@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Explore L'Oréal beauty suggestions for skin care, hair care and coloring, make-up, cosmetics, and fragrances.">
+  <title>L'Oréal | Beauty Assistant Preview</title>
+  <link rel="preconnect" href="https://www.loreal.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="L'Oréal beauty assistant home">L'ORÉAL<span>BEAUTY ASSISTANT</span></a>
+    <span class="preview-label"><span class="status-dot"></span> PREVIEW</span>
+  </header>
+
+  <main>
+    <div class="intro-line"><span>YOUR BEAUTY, YOUR WAY</span><span>01 / BEAUTY ASSISTANT</span></div>
+    <section class="workspace" aria-labelledby="page-title">
+      <div class="welcome">
+        <p class="eyebrow">A LITTLE HELP, JUST FOR YOU</p>
+        <h1 id="page-title">Beauty is personal.<br><em>Let's talk about it.</em></h1>
+        <p class="intro">From finding your new favorite to making sense of your routine, we're here for the questions that make you, you.</p>
+        <div class="image-wrap">
+          <img src="https://www.loreal.com/-/media/project/loreal/brand-sites/corp/master/lcorp/1-home/2026/rif/2025-annual-results-l-oreal-groupe-desk.jpg?rev=f3ea0dd9e08445f68bfa584716867bda" alt="L'Oréal Groupe imagery" fetchpriority="high" decoding="async">
+          <span class="image-caption">BECAUSE YOU'RE WORTH IT.</span>
+        </div>
+      </div>
+
+      <section class="assistant" aria-labelledby="assistant-title">
+        <div class="assistant-header">
+          <div><p class="eyebrow">HERE FOR YOUR BEAUTY QUESTIONS</p><h2 id="assistant-title">Your beauty assistant</h2></div>
+          <div class="assistant-actions">
+            <button class="end-chat-button" id="end-chat" type="button">END CHAT</button>
+            <span class="assistant-mark" aria-hidden="true">✳</span>
+          </div>
+        </div>
+        <section class="answer-section" aria-label="Answers and suggested topics">
+          <ol class="conversation-list" id="conversation" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
+            <li class="conversation assistant-conversation">
+              <div class="message-avatar" aria-hidden="true">L</div>
+              <div class="message-content">
+                <p class="message-name">L'ORÉAL BEAUTY ASSISTANT</p>
+                <div class="message"><p>Hi there! I'm so glad you're here.</p><p>Before we get started, what would you like me to call you?</p></div>
+              </div>
+            </li>
+          </ol>
+          <form class="name-form" id="name-form">
+            <label for="preferred-name">Your name or nickname</label>
+            <input id="preferred-name" name="preferred-name" type="text" maxlength="80" autocomplete="nickname" placeholder="What should I call you?" required>
+            <div class="name-actions">
+              <button class="ask-button" type="submit">LET'S CHAT</button>
+              <button class="skip-name-button" id="skip-name" type="button">Continue without a name</button>
+            </div>
+          </form>
+          <div class="topics" id="topics" hidden>
+            <p>CHOOSE A TOPIC</p>
+            <button class="topic" type="button" data-category="skin-care" data-prompt="I'd love help with skin care. Can you suggest a routine or products to explore?"><span>01</span> Skin Care <span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="hair-coloring" data-prompt="I'd love help with hair care or coloring. Can you suggest a routine or products to explore?"><span>02</span> Hair care and coloring <span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="makeup-cosmetics" data-prompt="I have a make-up or cosmetics question. Can you help me find a look or products to explore?"><span>03</span> Make-up/Cosmetics <span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="fragrances" data-prompt="I'd love help exploring perfumes or fragrances. Can you suggest L'Oréal products to explore?"><span>04</span> Perfumes/Fragrances <span aria-hidden="true">↗</span></button>
+          </div>
+        </section>
+        <section class="question-section" id="question-section" aria-labelledby="question-title" hidden>
+          <p class="eyebrow" id="question-title">YOUR QUESTION</p>
+          <form id="question-form">
+            <label class="sr-only" for="question">Ask your beauty question</label>
+            <textarea id="question" name="question" rows="3" maxlength="2000" placeholder="What would you like to know?" required></textarea>
+            <div class="question-actions">
+              <span class="question-hint">A little detail helps us make our answer more personal.</span>
+              <button class="ask-button" id="ask-button" type="submit">ASK AWAY</button>
+            </div>
+          </form>
+          <p class="chat-status" id="chat-status" role="status" aria-live="polite"></p>
+        </section>
+      </section>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="footer-brand"><span>© L'ORÉAL BEAUTY ASSISTANT</span><a href="https://www.loreal.com/" target="_blank" rel="noopener noreferrer">LOREAL.COM <span aria-hidden="true">↗</span></a></div>
+    <address class="footer-contact">
+      <span><strong>Customer service</strong> <a href="tel:+18003222036">1-800-322-2036</a> · <a href="https://www.lorealparisusa.com/contact-us" target="_blank" rel="noopener noreferrer">Contact L'Oréal Paris</a></span>
+      <span><strong>L'Oréal USA mailing address</strong> 10 Hudson Yards, New York, NY 10001</span>
+    </address>
+  </footer>
+  <dialog class="end-chat-dialog" id="end-chat-dialog" aria-labelledby="end-chat-message">
+    <p class="eyebrow">UNTIL NEXT TIME</p>
+    <p id="end-chat-message">Thank  you so much for trusting us with your questions. We look forward for further interatcions with you across our company lines. Always come back to, "How may I assist you today?"</p>
+    <form method="dialog"><button class="ask-button" type="submit">CLOSE CHAT</button></form>
+  </dialog>
+  <script src="chat.js" defer></script>
+</body>
+</html>
