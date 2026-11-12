@@ -78,6 +78,32 @@ test("a new topic is not restricted by the previous button and messages remain v
   assert.equal(chat.elements.get("#conversation").children.length, 5);
 });
 
+test("Enter submits questions, while Shift+Enter and text composition do not", () => {
+  const chat = makeChat();
+  const form = chat.elements.get("#question-form");
+  let submissions = 0;
+  form.requestSubmit = () => { submissions++; };
+  const keydown = chat.elements.get("#question").listeners.keydown;
+  let prevented = false;
+  const press = (options = {}) => keydown({
+    key: "Enter", shiftKey: false, isComposing: false, keyCode: 13,
+    preventDefault() { prevented = true; },
+    ...options,
+  });
+  press();
+  assert.equal(submissions, 1);
+  assert.equal(prevented, true);
+  prevented = false;
+  press({ shiftKey: true });
+  press({ isComposing: true });
+  press({ keyCode: 229 });
+  assert.equal(submissions, 1);
+  assert.equal(prevented, false);
+  chat.elements.get("#ask-button").disabled = true;
+  press();
+  assert.equal(submissions, 1);
+});
+
 test("Worker forwards valid preferred names and rejects invalid ones", async () => {
   const originalFetch = globalThis.fetch;
   let input;

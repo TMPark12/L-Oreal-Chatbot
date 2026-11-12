@@ -161,6 +161,13 @@ form.addEventListener("submit", (event) => {
   sendQuestion(questionInput.value);
 });
 
+questionInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey && !event.isComposing && event.keyCode !== 229) {
+    event.preventDefault();
+    if (!askButton.disabled) form.requestSubmit();
+  }
+});
+
 topicButtons.forEach((button) => {
   button.addEventListener("click", () => {
     sendQuestion(button.dataset.prompt, button.dataset.category);

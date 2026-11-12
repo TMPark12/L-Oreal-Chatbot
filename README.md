@@ -6,6 +6,7 @@ A preview of a friendly L'Oréal beauty assistant with a browser chat interface 
 
 - Responsive L'Oréal-branded preview with Skin Care, Hair care and coloring, Make-up/Cosmetics, and Perfumes/Fragrances topics.
 - Free-form questions and continuous conversation through the Cloudflare Worker.
+- Press Enter to submit a question, or Shift+Enter to insert a new line.
 - Topic buttons focus the initial question; later questions can move to another beauty topic. The full conversation remains visible while recent messages are sent for context.
 - A name or nickname can be supplied at the start of a chat, or skipped. The name is kept in the current page session and sent with chat requests to personalize replies.
 - Product and scientific information searches limited to `loreal.com` and `lorealparisusa.com`; official source links are shown with replies.
