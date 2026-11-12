@@ -120,6 +120,7 @@ test("Worker forwards valid preferred names and rejects invalid ones", async () 
     let response = await worker.fetch(request(" Alex "), { OPENAI_API_KEY: "test" });
     assert.equal(response.status, 200);
     assert.match(input[0].content, /preferred name/);
+    assert.doesNotMatch(input[0].content, /\bguest\b/i);
     assert.match(input[1].content, /"Alex"/);
     response = await worker.fetch(request(null), { OPENAI_API_KEY: "test" });
     assert.equal(response.status, 200);
