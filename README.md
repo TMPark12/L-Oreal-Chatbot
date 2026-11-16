@@ -8,7 +8,8 @@ A preview of a friendly L'Oréal beauty assistant with a browser chat interface 
 - Free-form questions and continuous conversation through the Cloudflare Worker.
 - Press Enter to submit a question, or Shift+Enter to insert a new line.
 - Topic buttons focus the initial question; later questions can move to another beauty topic. The full conversation remains visible while recent messages are sent for context.
-- A name or nickname can be supplied at the start of a chat, or skipped. The name is kept in the current page session and sent with chat requests to personalize replies.
+- Questions unrelated to beauty and L'Oréal are redirected to beauty topics. A L'Oréal Beauty Assistant status message appears while a reply is being prepared.
+- A name or nickname can be supplied at the start of a chat, or skipped. The name is kept in the current page session and sent with chat requests to personalize replies; occurrences of "user" in assistant replies are replaced with that name.
 - Product and scientific information searches limited to `loreal.com` and `lorealparisusa.com`; official source links are shown with replies.
 - The OpenAI API key stays in a Cloudflare Worker secret and is never sent to the browser.
 - End Chat opens a closing message and disables further questions for that chat.

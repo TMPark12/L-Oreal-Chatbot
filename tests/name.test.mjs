@@ -7,7 +7,7 @@ const workerSource = await readFile(new URL("../worker.js", import.meta.url), "u
 const { default: worker } = await import(`data:text/javascript;base64,${Buffer.from(workerSource).toString("base64")}`);
 const chatSource = await readFile(new URL("../chat.js", import.meta.url), "utf8");
 
-function makeChat() {
+function makeChat(fetchReply) {
   const elements = new Map();
   function element() {
     return {
@@ -27,18 +27,72 @@ function makeChat() {
     },
     querySelectorAll() { return []; },
     createElement() { return element(); },
+    createTextNode(text) { return { textContent: text }; },
   };
   const requests = [];
   const context = vm.createContext({
     document, console, URL,
     fetch: async (_url, options) => {
       requests.push(JSON.parse(options.body));
-      return { ok: true, headers: new Headers({ "content-type": "application/json" }), json: async () => ({ reply: "Hello!" }) };
+      return fetchReply
+        ? fetchReply()
+        : { ok: true, headers: new Headers({ "content-type": "application/json" }), json: async () => ({ reply: "Hello!" }) };
     },
   });
   vm.runInContext(chatSource, context);
   return { elements, requests, context };
 }
+
+test("assistant replies use the preferred name in place of user and preserve it in context", async () => {
+  const chat = makeChat(() => ({
+    ok: true, headers: new Headers({ "content-type": "application/json" }),
+    json: async () => ({ reply: "Hello, **USER**! A user's routine is personal; superuser stays unchanged." }),
+  }));
+  chat.elements.get("#preferred-name").value = "<Alex>";
+  chat.elements.get("#name-form").listeners.submit({ preventDefault() {} });
+  await vm.runInContext('sendQuestion("Hello")', chat.context);
+  const reply = chat.elements.get("#conversation").children.at(-1).children[1].children[1].children[0].children[0];
+  assert.equal(reply.children[1].textContent, "<Alex>");
+  assert.match(reply.children[2].textContent, /<Alex>'s routine.*superuser/);
+  await vm.runInContext('sendQuestion("More please")', chat.context);
+  assert.equal(chat.requests[1].messages[1].content, "Hello, **<Alex>**! A <Alex>'s routine is personal; superuser stays unchanged.");
+});
+
+test("assistant replies are unchanged when no name was supplied", async () => {
+  const chat = makeChat(() => ({
+    ok: true, headers: new Headers({ "content-type": "application/json" }),
+    json: async () => ({ reply: "Hello, user!" }),
+  }));
+  chat.elements.get("#skip-name").listeners.click();
+  await vm.runInContext('sendQuestion("Hello")', chat.context);
+  const reply = chat.elements.get("#conversation").children.at(-1).children[1].children[1].children[0].children[0];
+  assert.equal(reply.children[0].textContent, "Hello, user!");
+});
+
+test("the branded loading status lasts until a reply arrives", async () => {
+  let resolveReply;
+  const chat = makeChat(() => new Promise((resolve) => { resolveReply = resolve; }));
+  chat.elements.get("#skip-name").listeners.click();
+  const pending = vm.runInContext('sendQuestion("Tell me about skin care")', chat.context);
+  assert.match(chat.elements.get("#chat-status").textContent, /L'Oréal Beauty Assistant.*preparing/i);
+  assert.equal(chat.elements.get("#ask-button").disabled, true);
+  resolveReply({ ok: true, headers: new Headers({ "content-type": "application/json" }), json: async () => ({ reply: "Hello!" }) });
+  await pending;
+  assert.equal(chat.elements.get("#chat-status").textContent, "");
+  assert.equal(chat.elements.get("#ask-button").disabled, false);
+});
+
+test("a failed request replaces the loading status with an error", async () => {
+  const chat = makeChat(() => ({
+    ok: false,
+    headers: new Headers({ "content-type": "application/json" }),
+    json: async () => ({ error: "Please try again." }),
+  }));
+  chat.elements.get("#skip-name").listeners.click();
+  await vm.runInContext('sendQuestion("Tell me about skin care")', chat.context);
+  assert.equal(chat.elements.get("#chat-status").textContent, "Your question wasn't sent. You can try again.");
+  assert.equal(chat.elements.get("#ask-button").disabled, false);
+});
 
 test("the preferred name appears in the chat and is sent with later questions", async () => {
   const chat = makeChat();
@@ -153,6 +207,36 @@ test("Worker allows a new beauty topic after a category is selected", async () =
     assert.equal(response.status, 200);
     assert.match(input[0].content, /follow their new question instead of directing them back/);
     assert.equal(input[1].content, "Now help me with hair care");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Worker instructs the assistant to redirect unrelated questions without requiring a search", async () => {
+  const originalFetch = globalThis.fetch;
+  let requestBody;
+  const redirect = "I'm here to help with L'Oréal beauty questions. Would you like to explore skin care, hair care, makeup, or fragrances instead?";
+  globalThis.fetch = async (_url, options) => {
+    requestBody = JSON.parse(options.body);
+    return Response.json({ output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: redirect, annotations: [] }] }] });
+  };
+  try {
+    const response = await worker.fetch(new Request("https://worker.test/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        category: "skin-care",
+        messages: [{ role: "user", content: "What is the capital of France?" }],
+      }),
+    }), { OPENAI_API_KEY: "test" });
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).reply, redirect);
+    assert.equal(requestBody.tool_choice, "auto");
+    assert.match(requestBody.input[0].content, /unrelated to beauty and L'Oréal/);
+    assert.match(requestBody.input[0].content, /do not answer it or search the web/);
+    assert.match(requestBody.input[0].content, /skin care, hair care and coloring, makeup, or fragrances/);
+    assert.match(requestBody.input[0].content, /use the conversation context/);
+    assert.match(requestBody.input[0].content, /use web search and rely only on the official L'Oréal sites/);
   } finally {
     globalThis.fetch = originalFetch;
   }

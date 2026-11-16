@@ -1,5 +1,6 @@
 const CHAT_ENDPOINT = "https://lorealchatbot.tmpark12.workers.dev/";
 const MAX_QUESTION_LENGTH = 2000;
+const LOADING_MESSAGE = "Your L'Oréal Beauty Assistant is preparing your response...";
 
 const form = document.querySelector("#question-form");
 const questionInput = document.querySelector("#question");
@@ -75,6 +76,19 @@ function addMessage(text, role, isError = false, sources = []) {
 function parseFormattedText(text) {
   const container = document.createElement("div");
   container.className = "formatted-text";
+
+  function appendFormattedText(element, text) {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    parts.forEach((part) => {
+      if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+        const strong = document.createElement("strong");
+        strong.textContent = part.slice(2, -2);
+        element.append(strong);
+      } else {
+        element.append(document.createTextNode(part));
+      }
+    });
+  }
   
   // Split by double newlines for sections
   const sections = text.split(/\n\n+/);
@@ -96,7 +110,7 @@ function parseFormattedText(text) {
           container.append(currentElement);
         }
         const li = document.createElement("li");
-        li.innerHTML = trimmed.replace(/^[•\-]\s*/, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        appendFormattedText(li, trimmed.replace(/^[•\-]\s*/, ""));
         currentElement.append(li);
       }
       // Check for section headers (all caps or ending with colon)
@@ -110,7 +124,7 @@ function parseFormattedText(text) {
       // Regular paragraph with bold formatting
       else {
         const p = document.createElement("p");
-        p.innerHTML = trimmed.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        appendFormattedText(p, trimmed);
         container.append(p);
         currentElement = null;
       }
@@ -135,7 +149,11 @@ function setBusy(isBusy) {
   questionInput.disabled = isBusy || chatEnded;
   endChatButton.disabled = isBusy || chatEnded;
   askButton.textContent = isBusy ? "✨ FINDING YOUR ANSWER…" : "ASK AWAY";
-  statusMessage.textContent = isBusy ? "Let me search for the perfect answer for you..." : "";
+  if (isBusy) {
+    statusMessage.textContent = LOADING_MESSAGE;
+  } else if (statusMessage.textContent === LOADING_MESSAGE) {
+    statusMessage.textContent = "";
+  }
 }
 
 async function sendQuestion(question, category = null) {
@@ -178,8 +196,9 @@ async function sendQuestion(question, category = null) {
       throw new Error("We didn't receive a reply. Please try again.");
     }
 
-    history.splice(0, history.length, ...requestMessages.slice(-11), { role: "assistant", content: data.reply });
-    addMessage(data.reply, "assistant", false, Array.isArray(data.sources) ? data.sources : []);
+    const reply = preferredName ? data.reply.replace(/\buser\b/gi, () => preferredName) : data.reply;
+    history.splice(0, history.length, ...requestMessages.slice(-11), { role: "assistant", content: reply });
+    addMessage(reply, "assistant", false, Array.isArray(data.sources) ? data.sources : []);
     if (questionInput.value.trim() === trimmedQuestion) questionInput.value = "";
   } catch (error) {
     console.error("Chat request failed:", error);
