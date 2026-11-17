@@ -13,7 +13,7 @@ function makeChat(fetchReply, options = {}) {
   const elements = new Map();
   function element() {
     return {
-      value: "", hidden: false, disabled: false, dataset: {}, children: [], listeners: {},
+      value: "", hidden: false, disabled: false, dataset: {}, children: [], listeners: {}, style: {},
       get textContent() { return this._textContent ?? this.children.map((child) => child.textContent).join(""); },
       set textContent(value) { this._textContent = value; this.children = []; },
       append(...children) {
@@ -41,12 +41,20 @@ function makeChat(fetchReply, options = {}) {
       scrollIntoView() {},
     };
   }
-  const products = (options.products || []).map(({ id, name, description }) => {
+  const productCards = (options.products || []).map(({ id, category }) => {
+    const card = element();
+    card.dataset.productCard = id;
+    card.dataset.routineCategory = category || ({ serum: "skin", shampoo: "hair", mascara: "makeup", fragrance: "fragrance" })[id];
+    return card;
+  });
+  const products = (options.products || []).map(({ id, name, description }, index) => {
     const button = element();
     button.dataset.product = id;
     button["aria-describedby"] = `${id}-description`;
     const title = element();
     title.textContent = name;
+    productCards[index].querySelector = () => title;
+    button.closest = (selector) => selector === ".product-card" ? productCards[index] : null;
     const selection = element();
     button.querySelector = (selector) => selector === "strong" ? title : selection;
     const detail = element();
@@ -54,6 +62,8 @@ function makeChat(fetchReply, options = {}) {
     elements.set(`#${id}-description`, detail);
     return button;
   });
+  const routineCategories = ["skin", "hair", "fragrance", "makeup"].map((value) => ({ value, checked: false }));
+  const routineTimes = ["fast", "take-time", "in-between"].map((value) => ({ value, checked: false }));
   const document = {
     documentElement: {},
     querySelector(selector) {
@@ -61,10 +71,22 @@ function makeChat(fetchReply, options = {}) {
       return elements.get(selector);
     },
     getElementById(id) { return elements.get(`#${id}`); },
-    querySelectorAll(selector) { return selector === ".product-select" ? products : []; },
+    querySelectorAll(selector) {
+      if (selector === ".product-select") return products;
+      if (selector === ".product-card") return productCards;
+      return [];
+    },
     createElement() { return element(); },
     createTextNode(text) { return { textContent: text }; },
   };
+  const preferenceForm = document.querySelector("#routine-preferences-form");
+  preferenceForm.querySelectorAll = (selector) => selector === 'input[name="routine-category"]:checked'
+    ? routineCategories.filter((input) => input.checked)
+    : [];
+  preferenceForm.querySelector = (selector) => selector === 'input[name="routine-time"]:checked'
+    ? routineTimes.find((input) => input.checked) || null
+    : null;
+  document.querySelector("#product-grid").hidden = true;
   const requests = [];
   const storage = options.storage || new Map();
   const context = vm.createContext({
@@ -82,7 +104,12 @@ function makeChat(fetchReply, options = {}) {
   });
   vm.runInContext(i18nSource, context);
   vm.runInContext(chatSource, context);
-  return { elements, requests, context, products, storage, document };
+  function answerRoutineQuestions(categories, time) {
+    routineCategories.forEach((input) => { input.checked = categories.includes(input.value); });
+    routineTimes.forEach((input) => { input.checked = input.value === time; });
+    preferenceForm.listeners.submit({ preventDefault() {} });
+  }
+  return { elements, requests, context, products, routineCategories, routineTimes, productCards, answerRoutineQuestions, storage, document };
 }
 
 test("selected products persist, toggle, generate a routine, and remain available to follow-ups", async () => {
@@ -100,10 +127,13 @@ test("selected products persist, toggle, generate a routine, and remain availabl
   assert.equal(reloaded.elements.get("#selected-products").children.length, 2);
   reloaded.elements.get("#selected-products").children[1].children[1].listeners.click();
   assert.equal(reloaded.products[1]["aria-pressed"], "false");
+  reloaded.answerRoutineQuestions(["skin"], "fast");
+  assert.equal(reloaded.elements.get("#product-grid").hidden, false);
   reloaded.elements.get("#skip-name").listeners.click();
   reloaded.elements.get("#generate-routine").listeners.click();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(reloaded.requests[0].requestType, "routine");
+  assert.match(reloaded.requests[0].messages.at(-1).content, /Routine areas: Skin[\s\S]*Time preference: I need something fast/);
   assert.deepEqual(reloaded.requests[0].selectedProducts, [{ id: "serum", name: "Serum", description: "A serum" }]);
   await vm.runInContext('sendQuestion("What about evenings?")', reloaded.context);
   assert.equal(reloaded.requests[1].messages.length, 3);
@@ -120,10 +150,44 @@ test("routine generation requires a started chat and a selected product", () => 
   chat.elements.get("#generate-routine").listeners.click();
   assert.match(chat.elements.get("#routine-status").textContent, /name/i);
   chat.elements.get("#skip-name").listeners.click();
+  chat.elements.get("#generate-routine").listeners.click();
+  assert.match(chat.elements.get("#routine-status").textContent, /answer the routine questions/i);
+  chat.answerRoutineQuestions(["skin"], "fast");
   chat.products[0].listeners.click();
   chat.elements.get("#generate-routine").listeners.click();
   assert.match(chat.elements.get("#routine-status").textContent, /select at least one/i);
   assert.equal(chat.requests.length, 0);
+});
+
+test("routine answers are required before matching products are shown", () => {
+  const chat = makeChat(undefined, { products: [
+    { id: "serum", name: "Serum", description: "A serum" },
+    { id: "shampoo", name: "Shampoo", description: "A shampoo" },
+    { id: "mascara", name: "Mascara", description: "A mascara" },
+    { id: "fragrance", name: "Fragrance", description: "A fragrance" },
+  ] });
+  assert.equal(chat.elements.get("#product-grid").hidden, true);
+  chat.answerRoutineQuestions([], "fast");
+  assert.match(chat.elements.get("#routine-preference-status").textContent, /choose at least one/i);
+  assert.equal(chat.elements.get("#product-grid").hidden, true);
+  chat.answerRoutineQuestions(["skin", "makeup"], "take-time");
+  assert.equal(chat.elements.get("#routine-preference-status").textContent, "");
+  assert.equal(chat.elements.get("#product-grid").hidden, false);
+  assert.equal(chat.productCards[0].hidden, false);
+  assert.equal(chat.productCards[1].hidden, true);
+  assert.equal(chat.productCards[2].hidden, false);
+  assert.equal(chat.productCards[3].hidden, true);
+});
+
+test("catalog product images and names link to official product pages", () => {
+  const productLinks = [...htmlSource.matchAll(/<a class="product-link"[\s\S]*?<\/a>/g)].map(([link]) => link);
+  assert.equal(productLinks.length, 4);
+  for (const link of productLinks) {
+    assert.match(link, /class="product-image/);
+    assert.match(link, /class="product-name"/);
+    assert.match(link, /target="_blank" rel="noopener noreferrer"/);
+    assert.match(link, /https:\/\/www\.(?:lorealparisusa|lancome-usa)\.com\//);
+  }
 });
 
 test("the chat introduces the routine builder", () => {

@@ -96,41 +96,74 @@
           <div class="routine-guide">
             <h3 data-i18n="routineGuideTitle">How it works</h3>
             <ol>
-              <li data-i18n="routineStepSelect">Choose one or more products. Select a product again to remove it.</li>
+              <li data-i18n="routineStepSelect">Answer the routine questions, then choose one or more products.</li>
               <li data-i18n="routineStepGenerate">Start the chat with your name or skip it, then select Generate Routine.</li>
               <li data-i18n="routineStepChat">Find your routine and official sources in the chat, then ask follow-up questions.</li>
             </ol>
           </div>
-          <div class="product-grid">
-            <article class="product-card">
-              <button type="button" class="product-select" data-product="serum" aria-pressed="false" aria-describedby="serum-description"><span class="product-category" data-i18n="skin">Skin care</span><strong dir="auto">L'Oréal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+          <form id="routine-preferences-form" class="routine-preferences">
+            <fieldset class="routine-question">
+              <legend data-i18n="routineCategoryQuestion">What kind of routine are you looking to encompass?</legend>
+              <div class="routine-options">
+                <label class="routine-option"><input type="checkbox" name="routine-category" value="skin"><span data-i18n="routineSkin">Skin</span></label>
+                <label class="routine-option"><input type="checkbox" name="routine-category" value="hair"><span data-i18n="routineHair">Hair</span></label>
+                <label class="routine-option"><input type="checkbox" name="routine-category" value="fragrance"><span data-i18n="routineFragrance">Fragrance</span></label>
+                <label class="routine-option"><input type="checkbox" name="routine-category" value="makeup"><span data-i18n="routineMakeup">Make-up</span></label>
+              </div>
+            </fieldset>
+            <fieldset class="routine-question">
+              <legend data-i18n="routineTimeQuestion">How much time do you want to spend on your routine?</legend>
+              <div class="routine-options">
+                <label class="routine-option"><input type="radio" name="routine-time" value="fast" required><span data-i18n="routineFast">I need something fast</span></label>
+                <label class="routine-option"><input type="radio" name="routine-time" value="take-time" required><span data-i18n="routineTakeTime">I want to take my time and get it right</span></label>
+                <label class="routine-option"><input type="radio" name="routine-time" value="in-between" required><span data-i18n="routineInBetween">I'm somewhere in between</span></label>
+              </div>
+            </fieldset>
+            <button type="submit" class="ask-button" data-i18n="showProducts">SHOW MATCHING PRODUCTS</button>
+            <p id="routine-preference-status" class="chat-status" role="status" aria-live="polite"></p>
+          </form>
+          <div class="product-grid" id="product-grid" aria-live="polite" hidden>
+            <article class="product-card" data-product-card="serum" data-routine-category="skin">
+              <a class="product-link" href="https://www.lorealparisusa.com/skin-care/face-serums/revitalift-derm-intensives-pure-hyaluronic-acid-serum" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/skin-care/facial-moisturizers/revitalift-derm-intensives-pure-hyaluronic-acid-serum/071249377512_t1.png" alt="L'Oréal Paris Revitalift Pure Hyaluronic Acid Serum" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="serum" aria-pressed="false" aria-describedby="serum-description"><span class="product-category" data-i18n="skin">Skin care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="serum-description" data-i18n="serumDescription">A hyaluronic acid serum for skin hydration.</p>
-              <a href="https://www.lorealparisusa.com/skin-care/face-serums/revitalift-derm-intensives-pure-hyaluronic-acid-serum" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
             </article>
-            <article class="product-card">
-              <button type="button" class="product-select" data-product="shampoo" aria-pressed="false" aria-describedby="shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><strong dir="auto">L'Oréal Paris EverPure Sulfate Free Bond Repair+ Shampoo</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+            <article class="product-card" data-product-card="shampoo" data-routine-category="hair">
+              <a class="product-link" href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/sulfate-free-bond-strengthening-color-care-shampoo" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/hair-care/shampoo/everpure-sulfate-free-bond-strengthening-color-care-shampoo/03-13-26/071249406915-av1.png" alt="L'Oréal Paris EverPure Bond Repair+ Shampoo" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris EverPure Sulfate Free Bond Repair+ Shampoo</strong>
+              </a>
+              <button type="button" class="product-select" data-product="shampoo" aria-pressed="false" aria-describedby="shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="shampoo-description" data-i18n="shampooDescription">A sulfate-free shampoo for damaged and weak hair.</p>
-              <a href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/sulfate-free-bond-strengthening-color-care-shampoo" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
             </article>
-            <article class="product-card">
-              <button type="button" class="product-select" data-product="mascara" aria-pressed="false" aria-describedby="mascara-description"><span class="product-category" data-i18n="makeup">Makeup</span><strong dir="auto">L'Oréal Paris Voluminous Lash Paradise Washable Mascara</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+            <article class="product-card" data-product-card="mascara" data-routine-category="makeup">
+              <a class="product-link" href="https://www.lorealparisusa.com/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara/200-blackest-black/new-images/071249343265-t1-new.png" alt="L'Oréal Paris Voluminous Lash Paradise Mascara" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Voluminous Lash Paradise Washable Mascara</strong>
+              </a>
+              <button type="button" class="product-select" data-product="mascara" aria-pressed="false" aria-describedby="mascara-description"><span class="product-category" data-i18n="makeup">Makeup</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="mascara-description" data-i18n="mascaraDescription">A washable mascara for volume and length.</p>
-              <a href="https://www.lorealparisusa.com/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
             </article>
-            <article class="product-card">
-              <button type="button" class="product-select" data-product="fragrance" aria-pressed="false" aria-describedby="fragrance-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><strong dir="auto">Lancôme La Vie Est Belle</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+            <article class="product-card" data-product-card="fragrance" data-routine-category="fragrance">
+              <a class="product-link" href="https://www.lancome-usa.com/fragrance/fragrance-by-collection/la-vie-est-belle/la-vie-est-belle-eau-de-parfum/100606.html" target="_blank" rel="noopener noreferrer">
+                <span class="product-image fragrance-image" role="img" aria-label="Illustration of a fragrance bottle"><span aria-hidden="true">✳</span></span>
+                <strong class="product-name" dir="auto">Lancôme La Vie Est Belle Eau de Parfum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="fragrance" aria-pressed="false" aria-describedby="fragrance-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="fragrance-description" data-i18n="fragranceDescription">A Lancôme fragrance with iris and gourmand notes.</p>
-              <a href="https://www.loreal.com/it-it/italy/press-release/group/la-vie-est-belle-la-fragranza-della-felicit-di-lancme/" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
             </article>
           </div>
-          <div class="selected-products">
+          <div class="selected-products" id="selected-products-section" hidden>
             <h3 data-i18n="selectedProducts">Selected products</h3>
             <p id="selection-empty" data-i18n="noneSelected">No products selected yet.</p>
             <ul id="selected-products" aria-live="polite"></ul>
             <button type="button" id="clear-products" class="clear-products" data-i18n="clearProducts">Clear selection</button>
             <p class="selection-note" data-i18n="selectionNote">Your choices are saved in this browser. Remove individual products or clear them anytime.</p>
           </div>
-          <button type="button" id="generate-routine" class="ask-button" data-i18n="generateRoutine">GENERATE ROUTINE</button>
+          <button type="button" id="generate-routine" class="ask-button" data-i18n="generateRoutine" hidden>GENERATE ROUTINE</button>
           <p id="routine-status" class="chat-status" role="status"></p>
         </section>
       </section>

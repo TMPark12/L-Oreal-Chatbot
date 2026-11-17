@@ -19,6 +19,11 @@ const questionSection = document.querySelector("#question-section");
 const languageSelect = document.querySelector("#language");
 const localizedLanguageLabel = document.querySelector("#localized-language");
 const productButtons = [...document.querySelectorAll(".product-select")];
+const productCards = [...document.querySelectorAll(".product-card")];
+const productGrid = document.querySelector("#product-grid");
+const routinePreferencesForm = document.querySelector("#routine-preferences-form");
+const routinePreferenceStatus = document.querySelector("#routine-preference-status");
+const selectedProductsSection = document.querySelector("#selected-products-section");
 const selectedList = document.querySelector("#selected-products");
 const selectionEmpty = document.querySelector("#selection-empty");
 const clearProductsButton = document.querySelector("#clear-products");
@@ -31,6 +36,7 @@ let busy = false;
 let preferredName = "";
 let nameResolved = false;
 let chatEnded = false;
+let routinePreferences = null;
 
 function t(key) {
   return translations[language][key];
@@ -43,7 +49,7 @@ function renderSelection() {
     button.setAttribute("aria-pressed", String(selected));
     button.querySelector(".product-selection").textContent = t(selected ? "selected" : "selectProduct");
     if (!selected) return;
-    const name = button.querySelector("strong").textContent;
+    const name = button.closest(".product-card").querySelector(".product-name").textContent;
     const item = document.createElement("li");
     const label = document.createElement("span");
     label.textContent = name;
@@ -79,9 +85,9 @@ function updateSelection(id, selected) {
 }
 
 function selectedProductData() {
-  return productButtons.filter((button) => selectedProducts.has(button.dataset.product)).map((button) => ({
+  return productButtons.filter((button) => selectedProducts.has(button.dataset.product) && !button.closest(".product-card").hidden).map((button) => ({
     id: button.dataset.product,
-    name: button.querySelector("strong").textContent,
+    name: button.closest(".product-card").querySelector(".product-name").textContent,
     description: document.getElementById(button.getAttribute("aria-describedby")).textContent,
   }));
 }
@@ -138,6 +144,26 @@ languageSelect.addEventListener("change", () => {
 productButtons.forEach((button) => {
   button.addEventListener("click", () => updateSelection(button.dataset.product, !selectedProducts.has(button.dataset.product)));
 });
+routinePreferencesForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const categories = [...routinePreferencesForm.querySelectorAll('input[name="routine-category"]:checked')]
+    .map((input) => input.value);
+  const time = routinePreferencesForm.querySelector('input[name="routine-time"]:checked');
+  if (categories.length === 0) {
+    routinePreferenceStatus.textContent = t("chooseRoutineCategory");
+    return;
+  }
+  if (!time) return;
+
+  routinePreferences = { categories, time: time.value };
+  productCards.forEach((card) => {
+    card.hidden = !categories.includes(card.dataset.routineCategory);
+  });
+  productGrid.hidden = false;
+  selectedProductsSection.hidden = false;
+  generateButton.hidden = false;
+  routinePreferenceStatus.textContent = "";
+});
 clearProductsButton.addEventListener("click", () => {
   selectedProducts.clear();
   renderSelection();
@@ -146,11 +172,25 @@ clearProductsButton.addEventListener("click", () => {
 generateButton.addEventListener("click", () => {
   if (!nameResolved || chatEnded) {
     routineStatus.textContent = t("startFirst");
-  } else if (selectedProducts.size === 0) {
+  } else if (!routinePreferences) {
+    routineStatus.textContent = t("answerQuestionsFirst");
+  } else if (selectedProductData().length === 0) {
     routineStatus.textContent = t("selectFirst");
   } else {
     routineStatus.textContent = "";
-    sendQuestion(t("routineQuestion"), null, "routine");
+    const areaLabels = routinePreferences.categories.map((category) => t({
+      skin: "routineSkin",
+      hair: "routineHair",
+      fragrance: "routineFragrance",
+      makeup: "routineMakeup",
+    }[category])).join(", ");
+    const timeLabel = t({
+      fast: "routineFast",
+      "take-time": "routineTakeTime",
+      "in-between": "routineInBetween",
+    }[routinePreferences.time]);
+    const question = `${t("routineQuestion")}\n\n${t("routineAreasContext")}: ${areaLabels}\n${t("routineTimeContext")}: ${timeLabel}`;
+    sendQuestion(question, null, "routine");
   }
 });
 
