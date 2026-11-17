@@ -8,6 +8,7 @@ const { default: worker } = await import(`data:text/javascript;base64,${Buffer.f
 const chatSource = await readFile(new URL("../chat.js", import.meta.url), "utf8");
 const i18nSource = await readFile(new URL("../i18n.js", import.meta.url), "utf8");
 const htmlSource = await readFile(new URL("../index.html", import.meta.url), "utf8");
+const cssSource = await readFile(new URL("../style.css", import.meta.url), "utf8");
 
 function makeChat(fetchReply, options = {}) {
   const elements = new Map();
@@ -34,6 +35,7 @@ function makeChat(fetchReply, options = {}) {
         }
         return null;
       },
+      querySelectorAll(selector) { return selector === "li" ? this.children : []; },
       addEventListener(type, handler) { this.listeners[type] = handler; },
       setCustomValidity(message) { this.validationMessage = message; },
       reportValidity() {},
@@ -45,6 +47,7 @@ function makeChat(fetchReply, options = {}) {
     const card = element();
     card.dataset.productCard = id;
     card.dataset.routineCategory = category || ({ serum: "skin", shampoo: "hair", mascara: "makeup", fragrance: "fragrance" })[id];
+    card.hidden = true;
     return card;
   });
   const products = (options.products || []).map(({ id, name, description }, index) => {
@@ -87,6 +90,10 @@ function makeChat(fetchReply, options = {}) {
     ? routineTimes.find((input) => input.checked) || null
     : null;
   document.querySelector("#product-grid").hidden = true;
+  document.querySelector("#product-search-section").hidden = true;
+  document.querySelector("#product-search-empty").hidden = true;
+  document.querySelector("#selected-products-section").hidden = true;
+  document.querySelector("#generate-routine").hidden = true;
   const requests = [];
   const storage = options.storage || new Map();
   const context = vm.createContext({
@@ -94,6 +101,7 @@ function makeChat(fetchReply, options = {}) {
     localStorage: {
       getItem: (key) => storage.has(key) ? storage.get(key) : null,
       setItem: (key, value) => storage.set(key, value),
+      removeItem: (key) => storage.delete(key),
     },
     fetch: async (_url, options) => {
       requests.push(JSON.parse(options.body));
@@ -144,6 +152,46 @@ test("selected products persist, toggle, generate a routine, and remain availabl
   assert.deepEqual(JSON.parse(reloaded.storage.get("loreal-selected-products")), []);
 });
 
+test("chat history and context persist across reloads and clear when starting a new chat", async () => {
+  const chat = makeChat();
+  chat.elements.get("#skip-name").listeners.click();
+  await vm.runInContext('sendQuestion("What helps dry skin?")', chat.context);
+  const saved = JSON.parse(chat.storage.get("loreal-chat-history"));
+  assert.equal(saved.messages.at(-1).text, "Hello!");
+  assert.deepEqual(saved.history.map((message) => message.content), ["What helps dry skin?", "Hello!"]);
+
+  const reloaded = makeChat(undefined, { storage: chat.storage });
+  assert.equal(reloaded.elements.get("#conversation").children.length, 3);
+  assert.equal(reloaded.elements.get("#name-form").hidden, true);
+  assert.equal(reloaded.elements.get("#question-section").hidden, false);
+  await vm.runInContext('sendQuestion("What about at night?")', reloaded.context);
+  assert.deepEqual(reloaded.requests[0].messages.map((message) => message.content), [
+    "What helps dry skin?", "Hello!", "What about at night?",
+  ]);
+
+  vm.runInContext("clearChatHistory()", reloaded.context);
+  assert.equal(reloaded.storage.has("loreal-chat-history"), false);
+  assert.equal(reloaded.elements.get("#conversation").children.length, 0);
+});
+
+test("restoring chat history does not rewrite the saved transcript", async () => {
+  const chat = makeChat();
+  chat.elements.get("#skip-name").listeners.click();
+  await vm.runInContext('sendQuestion("What helps dry skin?")', chat.context);
+  let writes = 0;
+  const set = chat.storage.set.bind(chat.storage);
+  chat.storage.set = (key, value) => {
+    if (key === "loreal-chat-history") writes++;
+    return set(key, value);
+  };
+  const reloaded = makeChat(undefined, { storage: chat.storage });
+  assert.equal(writes, 0);
+  assert.equal(reloaded.elements.get("#conversation").children.length, 3);
+  await vm.runInContext('sendQuestion("And at night?")', reloaded.context);
+  assert.ok(writes > 0);
+  assert.equal(JSON.parse(chat.storage.get("loreal-chat-history")).messages.length, 5);
+});
+
 test("routine generation requires a started chat and a selected product", () => {
   const chat = makeChat(undefined, { products: [{ id: "serum", name: "Serum", description: "A serum" }] });
   chat.products[0].listeners.click();
@@ -170,18 +218,88 @@ test("routine answers are required before matching products are shown", () => {
   chat.answerRoutineQuestions([], "fast");
   assert.match(chat.elements.get("#routine-preference-status").textContent, /choose at least one/i);
   assert.equal(chat.elements.get("#product-grid").hidden, true);
+  assert.equal(chat.elements.get("#selected-products-section").hidden, true);
+  assert.equal(chat.elements.get("#generate-routine").hidden, true);
+  chat.answerRoutineQuestions(["skin"], null);
+  assert.match(chat.elements.get("#routine-preference-status").textContent, /choose how much time/i);
+  assert.equal(chat.elements.get("#product-grid").hidden, true);
   chat.answerRoutineQuestions(["skin", "makeup"], "take-time");
   assert.equal(chat.elements.get("#routine-preference-status").textContent, "");
   assert.equal(chat.elements.get("#product-grid").hidden, false);
+  assert.equal(chat.elements.get("#selected-products-section").hidden, false);
+  assert.equal(chat.elements.get("#generate-routine").hidden, false);
   assert.equal(chat.productCards[0].hidden, false);
   assert.equal(chat.productCards[1].hidden, true);
   assert.equal(chat.productCards[2].hidden, false);
   assert.equal(chat.productCards[3].hidden, true);
+  chat.elements.get("#routine-preferences-form").listeners.change();
+  assert.equal(chat.elements.get("#product-grid").hidden, true);
+  assert.equal(chat.elements.get("#selected-products-section").hidden, true);
+  assert.equal(chat.elements.get("#generate-routine").hidden, true);
+});
+
+test("product search combines with category filters without dropping selected products", async () => {
+  const chat = makeChat(undefined, { products: [
+    { id: "serum", name: "Hyaluronic Acid Serum", description: "A hydrating serum" },
+    { id: "shampoo", name: "EverPure Shampoo", description: "A sulfate-free shampoo" },
+  ] });
+  chat.answerRoutineQuestions(["skin"], "fast");
+  assert.equal(chat.elements.get("#product-search-section").hidden, false);
+  chat.products[0].listeners.click();
+
+  const search = chat.elements.get("#product-search");
+  search.value = "shampoo";
+  search.listeners.input();
+  assert.equal(chat.productCards[0].hidden, true);
+  assert.equal(chat.productCards[1].hidden, true);
+  assert.equal(chat.elements.get("#product-search-empty").hidden, false);
+
+  chat.answerRoutineQuestions(["skin", "hair"], "fast");
+  assert.equal(chat.productCards[0].hidden, true);
+  assert.equal(chat.productCards[1].hidden, false);
+  assert.equal(chat.elements.get("#product-search-empty").hidden, true);
+
+  search.value = "HYDRATING";
+  search.listeners.input();
+  assert.equal(chat.productCards[0].hidden, false);
+  assert.equal(chat.productCards[1].hidden, true);
+  search.value = "shampoo";
+  search.listeners.input();
+  chat.elements.get("#skip-name").listeners.click();
+  chat.elements.get("#generate-routine").listeners.click();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(chat.requests[0].selectedProducts, [{
+    id: "serum", name: "Hyaluronic Acid Serum", description: "A hydrating serum",
+  }]);
+  search.value = "";
+  search.listeners.input();
+  assert.equal(chat.productCards[0].hidden, false);
+  assert.equal(chat.productCards[1].hidden, false);
+});
+
+test("the product grid and search layout respect hidden state", () => {
+  for (const selector of ["product-grid", "product-search"]) {
+    assert.match(cssSource, new RegExp(`\\.${selector}:not\\(\\[hidden\\]\\)\\s*\\{[^}]*display:\\s*grid`));
+  }
 });
 
 test("catalog product images and names link to official product pages", () => {
   const productLinks = [...htmlSource.matchAll(/<a class="product-link"[\s\S]*?<\/a>/g)].map(([link]) => link);
-  assert.equal(productLinks.length, 4);
+  assert.equal(productLinks.length, 12);
+  const productCards = [...htmlSource.matchAll(/<article class="product-card"[^>]*>/g)].map(([card]) => card);
+  assert.equal(productCards.length, 12);
+  assert.ok(productCards.every((card) => /\shidden(?:\s|>)/.test(card)));
+  assert.match(htmlSource, /<div class="product-grid" id="product-grid"[^>]*\shidden>/);
+  assert.match(htmlSource, /<input id="product-search" type="search"/);
+  assert.match(htmlSource, /data-i18n-placeholder="productSearchPlaceholder"/);
+  const categories = [...htmlSource.matchAll(/data-routine-category="(skin|hair|makeup|fragrance)"/g)].map(([, category]) => category);
+  assert.deepEqual(
+    Object.fromEntries(["skin", "hair", "makeup", "fragrance"].map((category) => [
+      category,
+      categories.filter((item) => item === category).length,
+    ])),
+    { skin: 3, hair: 3, makeup: 3, fragrance: 3 },
+  );
   for (const link of productLinks) {
     assert.match(link, /class="product-image/);
     assert.match(link, /class="product-name"/);
@@ -196,6 +314,22 @@ test("the chat introduces the routine builder", () => {
   const welcome = chat.elements.get("#conversation").children[0];
   assert.match(welcome.textContent, /routine builder/i);
   assert.equal(welcome.querySelector(".routine-link").href, "#routine-builder");
+});
+
+test("official citations from the Worker are linked in assistant replies", async () => {
+  const source = { url: "https://www.loreal.com/en/", title: "L'Oréal Group" };
+  const chat = makeChat(() => ({
+    ok: true,
+    headers: new Headers({ "content-type": "application/json" }),
+    json: async () => ({ reply: "Here is current product information.", sources: [source] }),
+  }));
+  chat.elements.get("#skip-name").listeners.click();
+  await vm.runInContext('sendQuestion("What is new?")', chat.context);
+  const link = chat.elements.get("#conversation").children.at(-1).querySelector(".source-list").children[0].children[0];
+  assert.equal(link.href, source.url);
+  assert.equal(link.textContent, source.title);
+  assert.equal(link.target, "_blank");
+  assert.equal(link.rel, "noopener noreferrer");
 });
 
 test("language selection sets direction and is sent with chat requests", async () => {
@@ -427,11 +561,16 @@ test("Worker sends product context and language for routines and returns officia
     return Response.json({ output: [{ type: "message", role: "assistant", content: [{
       type: "output_text", text: "روتين", annotations: includeCitation ? [
         { type: "url_citation", url: "https://www.lorealparisusa.com/skin-care", title: "L'Oréal" },
+        { type: "url_citation", url: "https://www.lancome-usa.com/fragrance", title: "Lancôme" },
         { type: "url_citation", url: "https://example.com/not-official", title: "Other" },
       ] : [],
     }] }] });
   };
-  const products = [{ id: "serum", name: "Serum", description: "A serum" }];
+  const products = Array.from({ length: 12 }, (_, index) => ({
+    id: `product-${index}`,
+    name: index === 0 ? "Serum" : `Product ${index}`,
+    description: "A beauty product",
+  }));
   const request = (body) => new Request("https://worker.test/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -440,10 +579,17 @@ test("Worker sends product context and language for routines and returns officia
   try {
     let response = await worker.fetch(request({ requestType: "routine", language: "ar", selectedProducts: products }), { OPENAI_API_KEY: "test" });
     assert.equal(response.status, 200);
-    assert.deepEqual((await response.json()).sources, [{ url: "https://www.lorealparisusa.com/skin-care", title: "L'Oréal" }]);
+    assert.deepEqual((await response.json()).sources, [
+      { url: "https://www.lorealparisusa.com/skin-care", title: "L'Oréal" },
+      { url: "https://www.lancome-usa.com/fragrance", title: "Lancôme" },
+    ]);
+    assert.equal(upstream.model, "gpt-6-astra");
     assert.equal(upstream.tool_choice, "required");
+    assert.equal(upstream.tools[0].type, "web_search");
     assert.match(upstream.input[0].content, /Respond in Arabic/);
     assert.match(upstream.input[0].content, /how to use this app's routine builder/);
+    assert.match(upstream.input[0].content, /friendly, girl-to-girl tone/);
+    assert.deepEqual(upstream.tools[0].filters.allowed_domains, ["loreal.com", "lorealparisusa.com", "lancome-usa.com"]);
     assert.match(upstream.input[1].content, /"name":"Serum"/);
     assert.equal(upstream.input[2].content, "Create a routine");
     includeCitation = false;
@@ -451,6 +597,8 @@ test("Worker sends product context and language for routines and returns officia
     assert.equal(response.status, 502);
     assert.equal((await response.json()).code, "sources_unavailable");
     response = await worker.fetch(request({ requestType: "routine", selectedProducts: [] }), { OPENAI_API_KEY: "test" });
+    assert.equal(response.status, 400);
+    response = await worker.fetch(request({ selectedProducts: [...products, { id: "extra", name: "Extra", description: "Extra" }] }), { OPENAI_API_KEY: "test" });
     assert.equal(response.status, 400);
     response = await worker.fetch(request({ selectedProducts: [{ ...products[0], description: "x".repeat(501) }] }), { OPENAI_API_KEY: "test" });
     assert.equal(response.status, 400);
@@ -509,7 +657,7 @@ test("Worker instructs the assistant to redirect unrelated questions without req
     assert.match(requestBody.input[0].content, /do not answer it or search the web/);
     assert.match(requestBody.input[0].content, /skin care, hair care and coloring, makeup, or fragrances/);
     assert.match(requestBody.input[0].content, /use the conversation context/);
-    assert.match(requestBody.input[0].content, /use web search and rely only on the official L'Oréal sites/);
+    assert.match(requestBody.input[0].content, /use web search and rely only on official L'Oréal Groupe sites/);
   } finally {
     globalThis.fetch = originalFetch;
   }

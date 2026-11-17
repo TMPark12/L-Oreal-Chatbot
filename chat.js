@@ -2,6 +2,7 @@ const CHAT_ENDPOINT = "https://lorealchatbot.tmpark12.workers.dev/";
 const MAX_QUESTION_LENGTH = 2000;
 const STORAGE_KEY = "loreal-selected-products";
 const LANGUAGE_KEY = "loreal-language";
+const CHAT_STORAGE_KEY = "loreal-chat-history";
 
 const form = document.querySelector("#question-form");
 const questionInput = document.querySelector("#question");
@@ -20,6 +21,9 @@ const languageSelect = document.querySelector("#language");
 const localizedLanguageLabel = document.querySelector("#localized-language");
 const productButtons = [...document.querySelectorAll(".product-select")];
 const productCards = [...document.querySelectorAll(".product-card")];
+const productSearchSection = document.querySelector("#product-search-section");
+const productSearchInput = document.querySelector("#product-search");
+const productSearchEmpty = document.querySelector("#product-search-empty");
 const productGrid = document.querySelector("#product-grid");
 const routinePreferencesForm = document.querySelector("#routine-preferences-form");
 const routinePreferenceStatus = document.querySelector("#routine-preference-status");
@@ -30,6 +34,7 @@ const clearProductsButton = document.querySelector("#clear-products");
 const generateButton = document.querySelector("#generate-routine");
 const routineStatus = document.querySelector("#routine-status");
 const history = [];
+const chatMessages = [];
 const selectedProducts = new Set();
 let language = "en";
 let busy = false;
@@ -40,6 +45,27 @@ let routinePreferences = null;
 
 function t(key) {
   return translations[language][key];
+}
+
+function reportChatHistoryError() {
+  const message = t("chatHistoryError");
+  if (questionSection.hidden) routineStatus.textContent = message;
+  else statusMessage.textContent = message;
+}
+
+function saveChatState() {
+  try {
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify({
+      messages: chatMessages,
+      history,
+      preferredName,
+      nameResolved,
+      chatEnded,
+    }));
+  } catch (error) {
+    console.error("Unable to save chat history:", error);
+    reportChatHistoryError();
+  }
 }
 
 function renderSelection() {
@@ -85,7 +111,7 @@ function updateSelection(id, selected) {
 }
 
 function selectedProductData() {
-  return productButtons.filter((button) => selectedProducts.has(button.dataset.product) && !button.closest(".product-card").hidden).map((button) => ({
+  return productButtons.filter((button) => selectedProducts.has(button.dataset.product)).map((button) => ({
     id: button.dataset.product,
     name: button.closest(".product-card").querySelector(".product-name").textContent,
     description: document.getElementById(button.getAttribute("aria-describedby")).textContent,
@@ -112,6 +138,7 @@ function setLanguage(nextLanguage) {
   localizedLanguageLabel.hidden = language === "en";
   nameInput.setCustomValidity("");
   renderSelection();
+  updateProductVisibility();
 }
 
 let savedLanguage = "en";
@@ -153,15 +180,43 @@ routinePreferencesForm.addEventListener("submit", (event) => {
     routinePreferenceStatus.textContent = t("chooseRoutineCategory");
     return;
   }
-  if (!time) return;
+  if (!time) {
+    routinePreferenceStatus.textContent = t("chooseRoutineTime");
+    return;
+  }
 
   routinePreferences = { categories, time: time.value };
-  productCards.forEach((card) => {
-    card.hidden = !categories.includes(card.dataset.routineCategory);
-  });
+  productSearchSection.hidden = false;
+  updateProductVisibility();
   productGrid.hidden = false;
   selectedProductsSection.hidden = false;
   generateButton.hidden = false;
+  routinePreferenceStatus.textContent = "";
+});
+function updateProductVisibility() {
+  if (!routinePreferences) return;
+  const terms = productSearchInput.value.trim().toLocaleLowerCase(language).split(/\s+/).filter(Boolean);
+  let visibleCount = 0;
+  productCards.forEach((card) => {
+    const description = document.getElementById(`${card.dataset.productCard}-description`).textContent;
+    const name = card.querySelector(".product-name").textContent;
+    const categoryLabel = t(card.dataset.routineCategory);
+    const searchableText = `${name} ${description} ${card.dataset.routineCategory} ${categoryLabel}`.toLocaleLowerCase(language);
+    const matchesSearch = terms.every((term) => searchableText.includes(term));
+    card.hidden = !routinePreferences.categories.includes(card.dataset.routineCategory) || !matchesSearch;
+    if (!card.hidden) visibleCount++;
+  });
+  productSearchEmpty.hidden = terms.length === 0 || visibleCount > 0;
+}
+productSearchInput.addEventListener("input", updateProductVisibility);
+routinePreferencesForm.addEventListener("change", () => {
+  routinePreferences = null;
+  productGrid.hidden = true;
+  productCards.forEach((card) => { card.hidden = true; });
+  productSearchSection.hidden = true;
+  productSearchEmpty.hidden = true;
+  selectedProductsSection.hidden = true;
+  generateButton.hidden = true;
   routinePreferenceStatus.textContent = "";
 });
 clearProductsButton.addEventListener("click", () => {
@@ -194,7 +249,7 @@ generateButton.addEventListener("click", () => {
   }
 });
 
-function addMessage(text, role, isError = false, sources = [], isLoading = false) {
+function addMessage(text, role, isError = false, sources = [], isLoading = false, routineLink = false, persist = true) {
   const listItem = document.createElement("li");
   listItem.className = `conversation ${role === "user" ? "user-conversation" : "assistant-conversation"}`;
   if (isLoading) listItem.setAttribute("aria-hidden", "true");
@@ -243,10 +298,21 @@ function addMessage(text, role, isError = false, sources = [], isLoading = false
     sourceSection.append(sourceList);
     message.append(sourceSection);
   }
+  if (routineLink) {
+    const link = document.createElement("a");
+    link.className = "routine-link";
+    link.href = "#routine-builder";
+    link.textContent = t("openRoutine");
+    message.append(link);
+  }
   content.append(name, message);
   listItem.append(avatar, content);
   conversation.append(listItem);
   conversation.scrollTop = conversation.scrollHeight;
+  if (!isLoading) {
+    chatMessages.push({ text, role, isError, sources, routineLink });
+    if (persist) saveChatState();
+  }
   return listItem;
 }
 
@@ -412,15 +478,14 @@ function startChat(name) {
   topics.hidden = false;
   questionSection.hidden = false;
   if (preferredName) addMessage(preferredName, "user");
-  const welcomeMessage = addMessage(
+  addMessage(
     preferredName ? t("welcomeName").replace("{name}", () => preferredName) : t("welcome"),
     "assistant",
+    false,
+    [],
+    false,
+    true,
   );
-  const routineLink = document.createElement("a");
-  routineLink.className = "routine-link";
-  routineLink.href = "#routine-builder";
-  routineLink.textContent = t("openRoutine");
-  welcomeMessage.querySelector(".message").append(routineLink);
   questionInput.focus();
 }
 
@@ -456,7 +521,15 @@ topicButtons.forEach((button) => {
 });
 
 function clearChatHistory() {
+  let clearFailed = false;
+  try {
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+  } catch (error) {
+    console.error("Unable to clear chat history:", error);
+    clearFailed = true;
+  }
   history.splice(0, history.length);
+  chatMessages.splice(0, chatMessages.length);
   conversation.querySelectorAll("li").forEach((item) => item.remove());
   preferredName = "";
   nameResolved = false;
@@ -467,11 +540,65 @@ function clearChatHistory() {
   topics.hidden = true;
   questionSection.hidden = true;
   setBusy(false);
+  if (clearFailed) reportChatHistoryError();
 }
 
 endChatButton.addEventListener("click", () => {
   chatEnded = true;
   nameForm.hidden = true;
+  saveChatState();
   setBusy(false);
   endChatDialog.showModal();
 });
+
+function restoreChatState() {
+  try {
+    const saved = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (saved === null) return;
+    const state = JSON.parse(saved);
+    const validMessages = Array.isArray(state?.messages) && state.messages.every((item) =>
+      item && typeof item.text === "string" &&
+      (item.role === "user" || item.role === "assistant") &&
+      typeof item.isError === "boolean" &&
+      typeof item.routineLink === "boolean" &&
+      Array.isArray(item.sources) &&
+      item.sources.every((source) => {
+        if (!source || typeof source.url !== "string" ||
+            (source.title !== undefined && typeof source.title !== "string")) return false;
+        return ["http:", "https:"].includes(new URL(source.url).protocol);
+      }),
+    );
+    const validHistory = Array.isArray(state?.history) && state.history.every((item) =>
+      item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string",
+    );
+    if (!validMessages || !validHistory || typeof state.preferredName !== "string" ||
+        typeof state.nameResolved !== "boolean" || typeof state.chatEnded !== "boolean" || !state.nameResolved) {
+      throw new Error("Invalid saved chat history.");
+    }
+
+    preferredName = state.preferredName;
+    nameResolved = state.nameResolved;
+    chatEnded = state.chatEnded;
+    history.push(...state.history);
+    conversation.replaceChildren();
+    nameForm.hidden = true;
+    topics.hidden = false;
+    questionSection.hidden = false;
+    state.messages.forEach((item) => addMessage(
+      item.text,
+      item.role,
+      item.isError,
+      item.sources,
+      false,
+      item.routineLink,
+      false,
+    ));
+    setBusy(false);
+    conversation.scrollTop = conversation.scrollHeight;
+  } catch (error) {
+    console.error("Unable to load chat history:", error);
+    reportChatHistoryError();
+  }
+}
+
+restoreChatState();

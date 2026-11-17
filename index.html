@@ -92,7 +92,7 @@
         <section class="routine-builder" id="routine-builder" aria-labelledby="routine-title">
           <p class="eyebrow" data-i18n="routineEyebrow">YOUR PRODUCTS, YOUR ROUTINE</p>
           <h2 id="routine-title" data-i18n="routineTitle">Build your beauty routine</h2>
-          <p class="routine-intro" data-i18n="routineIntro">Choose the products you want to explore, then generate a personalized routine.</p>
+          <p class="routine-intro" data-i18n="routineIntro">Answer both questions to see products matched to your routine.</p>
           <div class="routine-guide">
             <h3 data-i18n="routineGuideTitle">How it works</h3>
             <ol>
@@ -122,8 +122,13 @@
             <button type="submit" class="ask-button" data-i18n="showProducts">SHOW MATCHING PRODUCTS</button>
             <p id="routine-preference-status" class="chat-status" role="status" aria-live="polite"></p>
           </form>
+          <div class="product-search" id="product-search-section" hidden>
+            <label for="product-search" data-i18n="productSearchLabel">Search products</label>
+            <input id="product-search" type="search" maxlength="100" autocomplete="off" aria-controls="product-grid" placeholder="Search by product name or keyword" data-i18n-placeholder="productSearchPlaceholder" dir="auto">
+            <p id="product-search-empty" class="product-search-empty" role="status" aria-live="polite" hidden data-i18n="productSearchNoResults">No products match your search.</p>
+          </div>
           <div class="product-grid" id="product-grid" aria-live="polite" hidden>
-            <article class="product-card" data-product-card="serum" data-routine-category="skin">
+            <article class="product-card" data-product-card="serum" data-routine-category="skin" hidden>
               <a class="product-link" href="https://www.lorealparisusa.com/skin-care/face-serums/revitalift-derm-intensives-pure-hyaluronic-acid-serum" target="_blank" rel="noopener noreferrer">
                 <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/skin-care/facial-moisturizers/revitalift-derm-intensives-pure-hyaluronic-acid-serum/071249377512_t1.png" alt="L'Oréal Paris Revitalift Pure Hyaluronic Acid Serum" loading="lazy" decoding="async">
                 <strong class="product-name" dir="auto">L'Oréal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum</strong>
@@ -131,7 +136,23 @@
               <button type="button" class="product-select" data-product="serum" aria-pressed="false" aria-describedby="serum-description"><span class="product-category" data-i18n="skin">Skin care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="serum-description" data-i18n="serumDescription">A hyaluronic acid serum for skin hydration.</p>
             </article>
-            <article class="product-card" data-product-card="shampoo" data-routine-category="hair">
+            <article class="product-card" data-product-card="vitamin-c" data-routine-category="skin" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/skin-care/face-serums/vitamin-c-vitamin-e-salicylic-acid-serum" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/skin-care/face-serums/vitamin-c-vitamin-e-salicylic-acid-serum/3600524053352_t1.png" alt="L'Oréal Paris Revitalift Vitamin C Serum" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Revitalift 12% Vitamin C + E + Salicylic Acid Serum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="vitamin-c" aria-pressed="false" aria-describedby="vitamin-c-description"><span class="product-category" data-i18n="skin">Skin care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="vitamin-c-description" data-i18n="vitaminCDescription">A vitamin C serum for a more radiant-looking complexion.</p>
+            </article>
+            <article class="product-card" data-product-card="peptide-serum" data-routine-category="skin" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/skin-care/face-serums/revitalift-triple-power-age-defying-serum" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/skin-care/face-serums/revitalift-triple-power-age-defying-serum/071249703212-t1.png" alt="L'Oréal Paris Revitalift Tri-Peptides Serum" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Revitalift Triple Power Tri-Peptides Serum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="peptide-serum" aria-pressed="false" aria-describedby="peptide-serum-description"><span class="product-category" data-i18n="skin">Skin care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="peptide-serum-description" data-i18n="peptideSerumDescription">A peptide face serum for the look of firmer, smoother skin.</p>
+            </article>
+            <article class="product-card" data-product-card="shampoo" data-routine-category="hair" hidden>
               <a class="product-link" href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/sulfate-free-bond-strengthening-color-care-shampoo" target="_blank" rel="noopener noreferrer">
                 <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/hair-care/shampoo/everpure-sulfate-free-bond-strengthening-color-care-shampoo/03-13-26/071249406915-av1.png" alt="L'Oréal Paris EverPure Bond Repair+ Shampoo" loading="lazy" decoding="async">
                 <strong class="product-name" dir="auto">L'Oréal Paris EverPure Sulfate Free Bond Repair+ Shampoo</strong>
@@ -139,7 +160,23 @@
               <button type="button" class="product-select" data-product="shampoo" aria-pressed="false" aria-describedby="shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="shampoo-description" data-i18n="shampooDescription">A sulfate-free shampoo for damaged and weak hair.</p>
             </article>
-            <article class="product-card" data-product-card="mascara" data-routine-category="makeup">
+            <article class="product-card" data-product-card="moisture-shampoo" data-routine-category="hair" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/everpure-moisture-shampoo" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/hair-care/shampoo/everpure-moisture-shampoo/moisture-shampoo/loreal-haircare-everpure-moisture-shampoo-71249341247-av1-v2-min.png" alt="L'Oréal Paris EverPure Sulfate-Free Moisturizing Shampoo" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris EverPure Sulfate-Free Moisturizing Shampoo</strong>
+              </a>
+              <button type="button" class="product-select" data-product="moisture-shampoo" aria-pressed="false" aria-describedby="moisture-shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="moisture-shampoo-description" data-i18n="moistureShampooDescription">A sulfate-free shampoo formulated to hydrate dry hair.</p>
+            </article>
+            <article class="product-card" data-product-card="hyaluron-shampoo" data-routine-category="hair" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/hyaluron-plump-hydrating-shampoo-paraben-free" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/hair-care/shampoo/hyaluron-plump-hydrating-shampoo-paraben-free/2025-assets/071249665671/071249665671_01-new.png" alt="L'Oréal Paris Elvive Hyaluron + Plump Hydrating Shampoo" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Elvive Hyaluron + Plump Hydrating Shampoo</strong>
+              </a>
+              <button type="button" class="product-select" data-product="hyaluron-shampoo" aria-pressed="false" aria-describedby="hyaluron-shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="hyaluron-shampoo-description" data-i18n="hyaluronShampooDescription">A hyaluronic acid shampoo that cleanses and hydrates dry hair.</p>
+            </article>
+            <article class="product-card" data-product-card="mascara" data-routine-category="makeup" hidden>
               <a class="product-link" href="https://www.lorealparisusa.com/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara" target="_blank" rel="noopener noreferrer">
                 <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara/200-blackest-black/new-images/071249343265-t1-new.png" alt="L'Oréal Paris Voluminous Lash Paradise Mascara" loading="lazy" decoding="async">
                 <strong class="product-name" dir="auto">L'Oréal Paris Voluminous Lash Paradise Washable Mascara</strong>
@@ -147,13 +184,45 @@
               <button type="button" class="product-select" data-product="mascara" aria-pressed="false" aria-describedby="mascara-description"><span class="product-category" data-i18n="makeup">Makeup</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="mascara-description" data-i18n="mascaraDescription">A washable mascara for volume and length.</p>
             </article>
-            <article class="product-card" data-product-card="fragrance" data-routine-category="fragrance">
+            <article class="product-card" data-product-card="true-match" data-routine-category="makeup" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/makeup/face/foundation-makeup/true-match-super-blendable-makeup" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/makeup/face/foundation-makeup/true-match-super-blendable-makeup/n1-soft-ivory-neutral/n1-light/071249671870_t1-v2.png" alt="L'Oréal Paris True Match Foundation" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris True Match Super-Blendable Foundation</strong>
+              </a>
+              <button type="button" class="product-select" data-product="true-match" aria-pressed="false" aria-describedby="true-match-description"><span class="product-category" data-i18n="makeup">Makeup</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="true-match-description" data-i18n="trueMatchDescription">A buildable foundation with a natural-looking finish.</p>
+            </article>
+            <article class="product-card" data-product-card="infallible-foundation" data-routine-category="makeup" hidden>
+              <a class="product-link" href="https://www.lorealparisusa.com/makeup/face/foundation-makeup/infallible-32-hour-fresh-wear-foundation-lightweight-495-amber" target="_blank" rel="noopener noreferrer">
+                <img class="product-image" src="https://www.lorealparisusa.com/-/media/project/loreal/brand-sites/oap/americas/us/products/makeup/face/foundation-makeup/infallible-24-hour-fresh-wear-foundation-lightweight/495-amber/22-05-24/071249382301-t1.png" alt="L'Oréal Paris Infallible Fresh Wear Foundation" loading="lazy" decoding="async">
+                <strong class="product-name" dir="auto">L'Oréal Paris Infallible Fresh Wear Foundation</strong>
+              </a>
+              <button type="button" class="product-select" data-product="infallible-foundation" aria-pressed="false" aria-describedby="infallible-foundation-description"><span class="product-category" data-i18n="makeup">Makeup</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="infallible-foundation-description" data-i18n="infallibleDescription">A lightweight, long-wear foundation with buildable coverage.</p>
+            </article>
+            <article class="product-card" data-product-card="fragrance" data-routine-category="fragrance" hidden>
               <a class="product-link" href="https://www.lancome-usa.com/fragrance/fragrance-by-collection/la-vie-est-belle/la-vie-est-belle-eau-de-parfum/100606.html" target="_blank" rel="noopener noreferrer">
                 <span class="product-image fragrance-image" role="img" aria-label="Illustration of a fragrance bottle"><span aria-hidden="true">✳</span></span>
                 <strong class="product-name" dir="auto">Lancôme La Vie Est Belle Eau de Parfum</strong>
               </a>
               <button type="button" class="product-select" data-product="fragrance" aria-pressed="false" aria-describedby="fragrance-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
               <p id="fragrance-description" data-i18n="fragranceDescription">A Lancôme fragrance with iris and gourmand notes.</p>
+            </article>
+            <article class="product-card" data-product-card="idole" data-routine-category="fragrance" hidden>
+              <a class="product-link" href="https://www.lancome-usa.com/fragrance/fragrance-by-collection/idole/idole-eau-de-parfum/LAN387.html" target="_blank" rel="noopener noreferrer">
+                <span class="product-image fragrance-image idole-image" role="img" aria-label="Illustration of the Lancôme Idôle Eau de Parfum bottle"><span aria-hidden="true">✳</span></span>
+                <strong class="product-name" dir="auto">Lancôme Idôle Eau de Parfum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="idole" aria-pressed="false" aria-describedby="idole-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="idole-description" data-i18n="idoleDescription">A fresh floral fragrance with notes of rose, jasmine, and vanilla.</p>
+            </article>
+            <article class="product-card" data-product-card="la-nuit-tresor" data-routine-category="fragrance" hidden>
+              <a class="product-link" href="https://www.lancome-usa.com/fragrance/fragrance-by-collection/tresor/la-nuit-tresor-eau-de-parfum/102607.html" target="_blank" rel="noopener noreferrer">
+                <span class="product-image fragrance-image tresor-image" role="img" aria-label="Illustration of the Lancôme La Nuit Trésor Eau de Parfum bottle"><span aria-hidden="true">✳</span></span>
+                <strong class="product-name" dir="auto">Lancôme La Nuit Trésor Eau de Parfum</strong>
+              </a>
+              <button type="button" class="product-select" data-product="la-nuit-tresor" aria-pressed="false" aria-describedby="la-nuit-tresor-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="la-nuit-tresor-description" data-i18n="tresorDescription">A warm fragrance with notes of raspberry, black rose, and vanilla.</p>
             </article>
           </div>
           <div class="selected-products" id="selected-products-section" hidden>

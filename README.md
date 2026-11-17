@@ -6,14 +6,15 @@ A preview of a friendly L'Oréal beauty assistant with a browser chat interface 
 
 - Responsive L'Oréal-branded preview with Skin Care, Hair care and coloring, Make-up/Cosmetics, and Perfumes/Fragrances topics.
 - Free-form questions and continuous conversation through the Cloudflare Worker.
+- The conversation transcript and recent chat context are saved in the browser's local storage and restored after a reload; **Start New Chat** clears the saved chat history.
 - Press Enter to submit a question, or Shift+Enter to insert a new line.
 - Topic buttons focus the initial question; later questions can move to another beauty topic. The full conversation remains visible while recent messages are sent for context.
 - Questions unrelated to beauty and L'Oréal are redirected to beauty topics. A temporary L'Oréal Beauty Assistant message appears in the conversation while a reply is being prepared.
-- A name or nickname can be supplied at the start of a chat, or skipped. The name is kept in the current page session and sent with chat requests to personalize replies; occurrences of "user" or "guest" in assistant replies are replaced with that name.
-- Narrow the starter catalog by answering two routine questions about beauty categories and time available, then browse matching product pictures and names linked to official sales pages. Product descriptions appear on each card. Remove individual products or clear the selection; selected product IDs are saved in the browser's local storage across reloads.
-- The routine builder is part of the chat panel and explains its steps; the chat introduces it and can explain how to use it. After starting a chat, answer both questions, select at least one matching product, and choose **Generate Routine**. The Worker sends the selected products and routine preferences to OpenAI, searches official sources, and returns a cited routine. Current selections and recent conversation are also sent with follow-up questions.
+- A name or nickname can be supplied at the start of a chat, or skipped. The name is saved with the chat in this browser and sent with chat requests to personalize replies; occurrences of "user" or "guest" in assistant replies are replaced with that name.
+- Answer both routine questions about beauty categories and time available before any products are shown. Then browse 12 curated products (three each for skin care, hair care, makeup, and fragrance), with pictures and links to official product pages. Search by product name or keyword alongside the routine category filters. Remove individual products or clear the selection; selected product IDs are saved in the browser's local storage across reloads.
+- The routine builder is part of the chat panel and explains its steps; the chat introduces it and can explain how to use it. After starting a chat, answer both questions, select at least one matching product, and choose **Generate Routine**. Routine suggestions use a warm, friendly, girl-to-girl tone while remaining inclusive and practical. The Worker sends the selected products and routine preferences to OpenAI, searches official sources, and returns a cited routine. Current selections and recent conversation are also sent with follow-up questions.
 - The language selector remains in the header as you scroll and lists English and native language names. It supports English, Arabic, Hebrew, Persian, and Urdu. RTL languages use a right-to-left layout and the selected language is saved in local storage. Product names remain in their original branding; earlier chat messages are not translated when switching languages.
-- Product and scientific information searches limited to `loreal.com` and `lorealparisusa.com`; official source links are shown with replies.
+- Product and scientific information searches limited to official `loreal.com`, `lorealparisusa.com`, and `lancome-usa.com` pages; official source links are shown with replies.
 - The OpenAI API key stays in a Cloudflare Worker secret and is never sent to the browser.
 - End Chat opens a closing message and disables further questions for that chat.
 - L'Oréal USA contact details are included in the footer.
@@ -50,7 +51,7 @@ The Worker reads the secret as `env.OPENAI_API_KEY`. Keep the actual key out of 
 
 The Worker is configured as `lorealchatbot` in [wrangler.toml](./wrangler.toml). If Cloudflare assigns a different workers.dev URL, update `CHAT_ENDPOINT` in [chat.js](./chat.js). OpenAI's Responses API web-search tool must be available to the account/model used by the Worker.
 
-The product catalog is a small curated starting point, not a live inventory. Its product information links point to official L'Oréal sources; availability can vary. Routine generation requires at least one official citation and reports an error if no source can be verified. Local storage can be unavailable in some browser privacy settings; in that case, the page reports that selections cannot be saved.
+The product catalog is a curated selection, not the complete live inventory. Its product information links point to official L'Oréal Groupe sources; availability can vary. Routine generation requires at least one official citation and reports an error if no source can be verified. Local storage can be unavailable in some browser privacy settings; in that case, the page reports that selections cannot be saved.
 
 After deploying, check the browser preflight response:
 
