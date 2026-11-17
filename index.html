@@ -13,88 +13,146 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="wordmark" href="index.html" aria-label="L'Oréal beauty assistant home">L'ORÉAL<span>BEAUTY ASSISTANT</span></a>
-    <span class="preview-label"><span class="status-dot"></span> PREVIEW</span>
+    <a class="wordmark" href="index.html" aria-label="L'Oréal beauty assistant home" data-i18n-aria-label="homeLabel"><span dir="ltr">L'ORÉAL</span><span data-i18n="assistantBrand">BEAUTY ASSISTANT</span></a>
+    <div class="header-options">
+      <div class="language-heading">
+        <label for="language"><span aria-hidden="true">🌐</span> <span lang="en" dir="ltr">Language</span><span id="localized-language" hidden> / <bdi data-i18n="language"></bdi></span></label>
+        <span class="preview-label"><span class="status-dot"></span> <span data-i18n="preview">PREVIEW</span></span>
+      </div>
+      <select id="language" dir="ltr">
+        <option value="en">English</option>
+        <option value="ar">Arabic — العربية</option>
+        <option value="he">Hebrew — עברית</option>
+        <option value="fa">Persian — فارسی</option>
+        <option value="ur">Urdu — اردو</option>
+      </select>
+    </div>
   </header>
 
   <main>
-    <div class="intro-line"><span>YOUR BEAUTY, YOUR WAY</span><span>01 / BEAUTY ASSISTANT</span></div>
+    <div class="intro-line"><span data-i18n="yourBeauty">YOUR BEAUTY, YOUR WAY</span><span data-i18n="assistantNumber">01 / BEAUTY ASSISTANT</span></div>
     <section class="workspace" aria-labelledby="page-title">
       <div class="welcome">
-        <p class="eyebrow">A LITTLE HELP, JUST FOR YOU</p>
-        <h1 id="page-title">Beauty is personal.<br><em>Let's talk about it.</em></h1>
-        <p class="intro">From finding your new favorite to making sense of your routine, we're here for the questions that make you, you.</p>
+        <p class="eyebrow" data-i18n="littleHelp">A LITTLE HELP, JUST FOR YOU</p>
+        <h1 id="page-title"><span data-i18n="beautyPersonal">Beauty is personal.</span><br><em data-i18n="letsTalk">Let's talk about it.</em></h1>
+        <p class="intro" data-i18n="intro">From finding your new favorite to making sense of your routine, we're here for the questions that make you, you.</p>
         <div class="image-wrap">
-          <img src="https://www.loreal.com/-/media/project/loreal/brand-sites/corp/master/lcorp/1-home/2026/rif/2025-annual-results-l-oreal-groupe-desk.jpg?rev=f3ea0dd9e08445f68bfa584716867bda" alt="L'Oréal Groupe imagery" fetchpriority="high" decoding="async">
-          <span class="image-caption">BECAUSE YOU'RE WORTH IT.</span>
+          <img src="https://www.loreal.com/-/media/project/loreal/brand-sites/corp/master/lcorp/1-home/2026/rif/2025-annual-results-l-oreal-groupe-desk.jpg?rev=f3ea0dd9e08445f68bfa584716867bda" alt="L'Oréal Groupe imagery" data-i18n-alt="imageAlt" fetchpriority="high" decoding="async">
+          <span class="image-caption" data-i18n="worthIt">BECAUSE YOU'RE WORTH IT.</span>
         </div>
+        <a class="intro-routine-link" href="#routine-builder"><span data-i18n="openRoutine">Explore the routine builder</span><span aria-hidden="true">↗</span></a>
       </div>
 
       <section class="assistant" aria-labelledby="assistant-title">
         <div class="assistant-header">
-          <div><p class="eyebrow">HERE FOR YOUR BEAUTY QUESTIONS</p><h2 id="assistant-title">Your beauty assistant</h2></div>
+          <div><p class="eyebrow" data-i18n="beautyQuestions">HERE FOR YOUR BEAUTY QUESTIONS</p><h2 id="assistant-title" data-i18n="assistantTitle">Your beauty assistant</h2></div>
           <div class="assistant-actions">
-            <button class="end-chat-button" id="end-chat" type="button">END CHAT</button>
+            <button class="end-chat-button" id="end-chat" type="button" data-i18n="endChat">END CHAT</button>
             <span class="assistant-mark" aria-hidden="true">✳</span>
           </div>
         </div>
-        <section class="answer-section" aria-label="Answers and suggested topics">
-          <ol class="conversation-list" id="conversation" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
+        <section class="answer-section" aria-label="Answers and suggested topics" data-i18n-aria-label="answersLabel">
+          <ol class="conversation-list" id="conversation" aria-label="Conversation" data-i18n-aria-label="conversationLabel" aria-live="polite" aria-relevant="additions text">
             <li class="conversation assistant-conversation">
               <div class="message-avatar" aria-hidden="true">L</div>
               <div class="message-content">
-                <p class="message-name">L'ORÉAL BEAUTY ASSISTANT</p>
-                <div class="message"><p>Hi there! 👋 Welcome to your personal beauty assistant. I'm here to help you find products, answer questions, and make your beauty routine amazing.</p><p>To get started, what should I call you?</p></div>
+                <p class="message-name" data-i18n="assistantName">L'ORÉAL BEAUTY ASSISTANT</p>
+                <div class="message"><p data-i18n="greeting">Hi there! 👋 I'm here to answer beauty questions and help you build a routine with the products you choose.</p><p data-i18n="askName">To get started, what should I call you?</p></div>
               </div>
             </li>
           </ol>
           <form class="name-form" id="name-form">
-            <label for="preferred-name">Your name or nickname</label>
-            <input id="preferred-name" name="preferred-name" type="text" maxlength="80" autocomplete="nickname" placeholder="What should I call you?" required>
+            <label for="preferred-name" data-i18n="nameLabel">Your name or nickname</label>
+            <input id="preferred-name" name="preferred-name" type="text" maxlength="80" autocomplete="nickname" placeholder="What should I call you?" data-i18n-placeholder="namePlaceholder" dir="auto" required>
             <div class="name-actions">
-              <button class="ask-button" type="submit">LET'S CHAT</button>
-              <button class="skip-name-button" id="skip-name" type="button">Continue without a name</button>
+              <button class="ask-button" type="submit" data-i18n="letsChat">LET'S CHAT</button>
+              <button class="skip-name-button" id="skip-name" type="button" data-i18n="skipName">Continue without a name</button>
             </div>
           </form>
           <div class="topics" id="topics" hidden>
-            <p>CHOOSE A TOPIC</p>
-            <button class="topic" type="button" data-category="skin-care" data-prompt="I'd love help with skin care. Can you suggest a routine or products to explore?"><span>01</span> Skin Care <span aria-hidden="true">↗</span></button>
-            <button class="topic" type="button" data-category="hair-coloring" data-prompt="I'd love help with hair care or coloring. Can you suggest a routine or products to explore?"><span>02</span> Hair care and coloring <span aria-hidden="true">↗</span></button>
-            <button class="topic" type="button" data-category="makeup-cosmetics" data-prompt="I have a make-up or cosmetics question. Can you help me find a look or products to explore?"><span>03</span> Make-up/Cosmetics <span aria-hidden="true">↗</span></button>
-            <button class="topic" type="button" data-category="fragrances" data-prompt="I'd love help exploring perfumes or fragrances. Can you suggest L'Oréal products to explore?"><span>04</span> Perfumes/Fragrances <span aria-hidden="true">↗</span></button>
+            <p data-i18n="chooseTopic">CHOOSE A TOPIC</p>
+            <button class="topic" type="button" data-category="skin-care" data-prompt-key="skinPrompt"><span>01</span><span data-i18n="skin">Skin Care</span><span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="hair-coloring" data-prompt-key="hairPrompt"><span>02</span><span data-i18n="hairColor">Hair care and coloring</span><span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="makeup-cosmetics" data-prompt-key="makeupPrompt"><span>03</span><span data-i18n="makeup">Make-up/Cosmetics</span><span aria-hidden="true">↗</span></button>
+            <button class="topic" type="button" data-category="fragrances" data-prompt-key="fragrancePrompt"><span>04</span><span data-i18n="fragrance">Perfumes/Fragrances</span><span aria-hidden="true">↗</span></button>
           </div>
         </section>
         <section class="question-section" id="question-section" aria-labelledby="question-title" hidden>
-          <p class="eyebrow" id="question-title">YOUR QUESTION</p>
+          <p class="eyebrow" id="question-title" data-i18n="yourQuestion">YOUR QUESTION</p>
           <form id="question-form">
-            <label class="sr-only" for="question">Ask your beauty question</label>
-            <textarea id="question" name="question" rows="3" maxlength="2000" placeholder="What would you like to know?" required></textarea>
+            <label class="sr-only" for="question" data-i18n="questionLabel">Ask your beauty question</label>
+            <textarea id="question" name="question" rows="3" maxlength="2000" placeholder="What would you like to know?" data-i18n-placeholder="questionPlaceholder" dir="auto" required></textarea>
             <div class="question-actions">
-              <span class="question-hint">Press Enter to ask, or Shift+Enter for a new line.</span>
-              <button class="ask-button" id="ask-button" type="submit">ASK AWAY</button>
+              <span class="question-hint" data-i18n="questionHint">Press Enter to ask, or Shift+Enter for a new line.</span>
+              <button class="ask-button" id="ask-button" type="submit" data-i18n="askAway">ASK AWAY</button>
             </div>
           </form>
           <p class="chat-status" id="chat-status" role="status" aria-live="polite"></p>
+        </section>
+        <section class="routine-builder" id="routine-builder" aria-labelledby="routine-title">
+          <p class="eyebrow" data-i18n="routineEyebrow">YOUR PRODUCTS, YOUR ROUTINE</p>
+          <h2 id="routine-title" data-i18n="routineTitle">Build your beauty routine</h2>
+          <p class="routine-intro" data-i18n="routineIntro">Choose the products you want to explore, then generate a personalized routine.</p>
+          <div class="routine-guide">
+            <h3 data-i18n="routineGuideTitle">How it works</h3>
+            <ol>
+              <li data-i18n="routineStepSelect">Choose one or more products. Select a product again to remove it.</li>
+              <li data-i18n="routineStepGenerate">Start the chat with your name or skip it, then select Generate Routine.</li>
+              <li data-i18n="routineStepChat">Find your routine and official sources in the chat, then ask follow-up questions.</li>
+            </ol>
+          </div>
+          <div class="product-grid">
+            <article class="product-card">
+              <button type="button" class="product-select" data-product="serum" aria-pressed="false" aria-describedby="serum-description"><span class="product-category" data-i18n="skin">Skin care</span><strong dir="auto">L'Oréal Paris Revitalift 1.5% Pure Hyaluronic Acid Serum</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="serum-description" data-i18n="serumDescription">A hyaluronic acid serum for skin hydration.</p>
+              <a href="https://www.lorealparisusa.com/skin-care/face-serums/revitalift-derm-intensives-pure-hyaluronic-acid-serum" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
+            </article>
+            <article class="product-card">
+              <button type="button" class="product-select" data-product="shampoo" aria-pressed="false" aria-describedby="shampoo-description"><span class="product-category" data-i18n="hair">Hair care</span><strong dir="auto">L'Oréal Paris EverPure Sulfate Free Bond Repair+ Shampoo</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="shampoo-description" data-i18n="shampooDescription">A sulfate-free shampoo for damaged and weak hair.</p>
+              <a href="https://www.lorealparisusa.com/hair-care-hair-style/shampoo/sulfate-free-bond-strengthening-color-care-shampoo" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
+            </article>
+            <article class="product-card">
+              <button type="button" class="product-select" data-product="mascara" aria-pressed="false" aria-describedby="mascara-description"><span class="product-category" data-i18n="makeup">Makeup</span><strong dir="auto">L'Oréal Paris Voluminous Lash Paradise Washable Mascara</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="mascara-description" data-i18n="mascaraDescription">A washable mascara for volume and length.</p>
+              <a href="https://www.lorealparisusa.com/makeup/eye/mascara/voluminous-lash-paradise-washable-mascara" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
+            </article>
+            <article class="product-card">
+              <button type="button" class="product-select" data-product="fragrance" aria-pressed="false" aria-describedby="fragrance-description"><span class="product-category" data-i18n="fragrance">Fragrance</span><strong dir="auto">Lancôme La Vie Est Belle</strong><span class="product-selection" data-i18n="selectProduct">Select product</span></button>
+              <p id="fragrance-description" data-i18n="fragranceDescription">A Lancôme fragrance with iris and gourmand notes.</p>
+              <a href="https://www.loreal.com/it-it/italy/press-release/group/la-vie-est-belle-la-fragranza-della-felicit-di-lancme/" target="_blank" rel="noopener noreferrer" data-i18n="officialSource">Official product information ↗</a>
+            </article>
+          </div>
+          <div class="selected-products">
+            <h3 data-i18n="selectedProducts">Selected products</h3>
+            <p id="selection-empty" data-i18n="noneSelected">No products selected yet.</p>
+            <ul id="selected-products" aria-live="polite"></ul>
+            <button type="button" id="clear-products" class="clear-products" data-i18n="clearProducts">Clear selection</button>
+            <p class="selection-note" data-i18n="selectionNote">Your choices are saved in this browser. Remove individual products or clear them anytime.</p>
+          </div>
+          <button type="button" id="generate-routine" class="ask-button" data-i18n="generateRoutine">GENERATE ROUTINE</button>
+          <p id="routine-status" class="chat-status" role="status"></p>
         </section>
       </section>
     </section>
   </main>
   <footer class="site-footer">
-    <div class="footer-brand"><span>© L'ORÉAL BEAUTY ASSISTANT</span><a href="https://www.loreal.com/" target="_blank" rel="noopener noreferrer">LOREAL.COM <span aria-hidden="true">↗</span></a></div>
+    <div class="footer-brand"><span data-i18n="footerBrand">© L'ORÉAL BEAUTY ASSISTANT</span><a href="https://www.loreal.com/" target="_blank" rel="noopener noreferrer">LOREAL.COM <span aria-hidden="true">↗</span></a></div>
     <address class="footer-contact">
-      <span><strong>Customer service</strong> <a href="tel:+18003222036">1-800-322-2036</a> · <a href="https://www.lorealparisusa.com/contact-us" target="_blank" rel="noopener noreferrer">Contact L'Oréal Paris</a></span>
-      <span><strong>L'Oréal USA mailing address</strong> 10 Hudson Yards, New York, NY 10001</span>
+      <span><strong data-i18n="customerService">Customer service</strong> <a href="tel:+18003222036" dir="ltr">1-800-322-2036</a> · <a href="https://www.lorealparisusa.com/contact-us" target="_blank" rel="noopener noreferrer" data-i18n="contact">Contact L'Oréal Paris</a></span>
+      <span><strong data-i18n="address">L'Oréal USA mailing address</strong> <span dir="ltr">10 Hudson Yards, New York, NY 10001</span></span>
     </address>
   </footer>
   <dialog class="end-chat-dialog" id="end-chat-dialog" aria-labelledby="end-chat-message">
-    <p class="eyebrow">THANK YOU!</p>
-    <p id="end-chat-message">Thank you so much for your wonderful questions today! I absolutely loved helping you explore L'Oréal beauty products and tips. Your curiosity and engagement made this chat truly special. 💕</p>
-    <p class="end-chat-note">Remember, beauty is personal and unique to you. Feel free to come back anytime you want more recommendations, tips, or just to chat about your beauty routine. We can't wait to see you again! ✨</p>
+    <p class="eyebrow" data-i18n="thankYou">THANK YOU!</p>
+    <p id="end-chat-message" data-i18n="endMessage">Thank you so much for your wonderful questions today! I absolutely loved helping you explore L'Oréal beauty products and tips. Your curiosity and engagement made this chat truly special. 💕</p>
+    <p class="end-chat-note" data-i18n="endNote">Remember, beauty is personal and unique to you. Feel free to come back anytime you want more recommendations, tips, or just to chat about your beauty routine. We can't wait to see you again! ✨</p>
     <form class="end-chat-actions" method="dialog">
-      <button class="ask-button" type="submit" onclick="clearChatHistory()">START NEW CHAT</button>
-      <button class="end-chat-close-button" type="button" onclick="this.closest('dialog').close()">CLOSE</button>
+      <button class="ask-button" type="submit" onclick="clearChatHistory()" data-i18n="newChat">START NEW CHAT</button>
+      <button class="end-chat-close-button" type="button" onclick="this.closest('dialog').close()" data-i18n="close">CLOSE</button>
     </form>
   </dialog>
+  <script src="i18n.js" defer></script>
   <script src="chat.js" defer></script>
 </body>
 </html>
